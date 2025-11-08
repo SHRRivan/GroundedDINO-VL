@@ -114,8 +114,12 @@ jobs:
 
     - name: Validate pyproject.toml
       run: |
+        pip install tomli
         python -c "
-        import tomllib
+        try:
+            import tomllib
+        except ImportError:
+            import tomli as tomllib
         import sys
 
         with open('pyproject.toml', 'rb') as f:
