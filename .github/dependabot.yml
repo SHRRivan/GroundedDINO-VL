@@ -19,9 +19,12 @@ updates:
     labels:
       - "dependencies"
       - "python"
-    # Ignore PyTorch version updates since we target specific versions
+    # Ignore specific version updates for compatibility
     ignore:
       - dependency-name: "torch"
         update-types: ["version-update:semver-major", "version-update:semver-minor"]
       - dependency-name: "torchvision"
         update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      - dependency-name: "supervision"
+        # Pinned to 0.4.0 for compatibility with original GroundingDINO
+        update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]
