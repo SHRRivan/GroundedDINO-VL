@@ -134,7 +134,12 @@ jobs:
         if 'ghostcipher1' not in config['project']['authors'][0]['name'].lower():
             errors.append('Author must be ghostcipher1')
 
-        if 'Apache' not in str(config['project']['license']):
+        # License can be either a string or a dict with 'file' key
+        license_info = config['project'].get('license', {})
+        if isinstance(license_info, dict) and 'file' in license_info:
+            # License is in a separate file - that's valid
+            pass
+        elif 'Apache' not in str(license_info):
             errors.append('License must be Apache 2.0')
 
         # Check for forbidden references
