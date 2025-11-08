@@ -4,9 +4,11 @@
 
 [![CI](https://github.com/ghostcipher1/groundingdino-cu128/actions/workflows/ci.yml/badge.svg)](https://github.com/ghostcipher1/groundingdino-cu128/actions/workflows/ci.yml)
 [![Code Quality](https://github.com/ghostcipher1/groundingdino-cu128/actions/workflows/code-quality.yml/badge.svg)](https://github.com/ghostcipher1/groundingdino-cu128/actions/workflows/code-quality.yml)
+[![Docker](https://github.com/ghostcipher1/groundingdino-cu128/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/ghostcipher1/groundingdino-cu128/actions/workflows/docker-publish.yml)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
 [![PyPI](https://img.shields.io/badge/PyPI-groundingdino--cu128-blue.svg)](https://pypi.org/project/groundingdino-cu128/)
+[![Docker](https://img.shields.io/badge/Docker-GHCR-blue.svg)](https://github.com/ghostcipher1/groundingdino-cu128/pkgs/container/groundingdino-cu128)
 
 ---
 
@@ -83,9 +85,22 @@ The optional `shadow_dino` wrapper namespace provides:
 
 ## Installation
 
+> **⚠️ IMPORTANT: CUDA Toolkit Required**
+>
+> This package requires the **NVIDIA CUDA Toolkit** to be installed on your system **BEFORE** installation.
+> The package includes CUDA extensions that must be compiled during `pip install`.
+>
+> **Install CUDA Toolkit first:**
+> - CUDA 12.6 or 12.8: https://developer.nvidia.com/cuda-downloads
+> - Set `CUDA_HOME` environment variable (e.g., `export CUDA_HOME=/usr/local/cuda`)
+> - Verify: `nvcc --version`
+>
+> **Without CUDA toolkit installed, the installation will fail.**
+
 ### From PyPI (Recommended)
 
 ```bash
+# After installing CUDA toolkit:
 pip install groundingdino-cu128
 ```
 
@@ -101,9 +116,64 @@ pip install -e .
 
 ### Requirements
 
+- **NVIDIA CUDA Toolkit 12.6 or 12.8** (required before installation)
 - Python >= 3.9
 - PyTorch >= 2.7.0, < 2.8
-- CUDA 12.8 (for GPU support)
+- CUDA-capable GPU (for GPU acceleration)
+
+## Docker
+
+For users who prefer a pre-configured environment without manually installing CUDA toolkit and dependencies, we provide ready-to-run Docker images with everything pre-installed.
+
+### Quick Start with Docker
+
+```bash
+# Pull the latest image from GitHub Container Registry
+docker pull ghcr.io/ghostcipher1/groundingdino-cu128:latest
+
+# Run with GPU support
+docker run --gpus all -it --rm ghcr.io/ghostcipher1/groundingdino-cu128:latest
+
+# Run a quick test
+docker run --gpus all --rm ghcr.io/ghostcipher1/groundingdino-cu128:latest python -c "
+import groundingdino
+import shadow_dino
+print(f'✓ GroundingDINO version: {shadow_dino.__version__}')
+print(f'✓ CUDA available: {shadow_dino.__cuda_available__}')
+"
+```
+
+### Docker Image Details
+
+The Docker image includes:
+- **Base**: NVIDIA CUDA 12.8.0 runtime on Ubuntu 22.04
+- **Python**: 3.10
+- **PyTorch**: 2.7.1 with CUDA 12.8 support
+- **GroundingDINO**: Pre-installed with all dependencies
+- **Size**: Multi-stage build optimized for smaller runtime image
+
+### Available Tags
+
+- `latest` - Latest stable release
+- `edge` - Latest build from main branch
+- `v0.2.0` - Specific version tags
+- `main-<sha>` - Commit-specific builds
+
+### Building Locally
+
+```bash
+# Build the image
+docker build -t groundingdino-cu128:local .
+
+# Test the build
+docker run --gpus all --rm groundingdino-cu128:local python -c "import groundingdino; print('OK')"
+```
+
+### Docker Requirements
+
+- **NVIDIA Docker Runtime** (`nvidia-docker2` or Docker with `--gpus` support)
+- **NVIDIA GPU** with compatible drivers
+- See [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/) for setup
 
 ## Usage
 
