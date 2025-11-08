@@ -21,9 +21,20 @@ __version__ = "0.2.0"
 from groundingdino import *  # noqa: F401, F403
 
 # Explicitly re-export commonly used modules for better IDE support
-from groundingdino import models  # noqa: F401
-from groundingdino import util  # noqa: F401
-from groundingdino import datasets  # noqa: F401
+try:
+    from groundingdino import models  # noqa: F401
+except ImportError:
+    pass
+
+try:
+    from groundingdino import util  # noqa: F401
+except ImportError:
+    pass
+
+try:
+    from groundingdino import datasets  # noqa: F401
+except ImportError:
+    pass
 
 # Provide access to the CUDA extension through this namespace
 try:
@@ -32,10 +43,11 @@ try:
 except ImportError:
     __cuda_available__ = False
 
-__all__ = [
-    'models',
-    'util',
-    'datasets',
-    '__version__',
-    '__cuda_available__',
-]
+# Build __all__ dynamically based on what's available
+__all__ = ['__version__', '__cuda_available__']
+if 'models' in dir():
+    __all__.append('models')
+if 'util' in dir():
+    __all__.append('util')
+if 'datasets' in dir():
+    __all__.append('datasets')
