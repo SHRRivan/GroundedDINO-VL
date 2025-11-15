@@ -272,11 +272,12 @@ python setup.py build_ext --inplace --verbose
 
 **Test failures**: Ensure PYTHONPATH includes project root
 
+
 ## Getting Help
 
 - **Issues**: Open a GitHub issue for bugs or feature requests
 - **Discussions**: Use GitHub Discussions for questions
-- **Documentation**: Check README.md and existing docs
+- **Documentation**: Check README.md (root directory) and existing docs
 
 ## Recognition
 

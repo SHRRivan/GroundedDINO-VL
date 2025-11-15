@@ -13,6 +13,41 @@
 
 ---
 
+## 📌 Important: Versioning Change
+
+> **Version Format Update**: This project now uses **year-based versioning** (e.g., `2025.2.1`) instead of semantic versioning (e.g., `0.2.1`).
+
+### Why the Change?
+
+The versioning scheme was updated to **year.major.minor** format for several important reasons:
+
+1. **Clear Release Context**: The year prefix immediately indicates when the release was made, making it easier to understand the timeline of updates and compatibility requirements.
+
+2. **Better Long-term Maintenance**: For a maintained fork that may span multiple years, year-based versioning provides better organization and prevents version number conflicts over time.
+
+3. **Industry Alignment**: Many modern projects (especially in ML/AI) use year-based versioning to clearly communicate release timelines and compatibility windows.
+
+4. **Version Clarity**: The format `2025.2.1` clearly communicates:
+   - **2025**: Release year
+   - **2**: Major version within the year
+   - **1**: Minor version/patch
+
+### What This Means for You
+
+- ✅ **No Breaking Changes**: The version format change does not affect functionality or API compatibility
+- ✅ **Same Package**: All imports and usage remain identical (`import groundingdino` still works)
+- ✅ **Backward Compatible**: Existing code continues to work without modification
+- ✅ **Clearer Updates**: Version numbers now clearly indicate release year and version progression
+
+### Version History
+
+- **Previous format**: `0.2.1`, `0.2.0` (semantic versioning)
+- **Current format**: `2025.2.1`, `2025.2.0` (year-based versioning)
+
+The functionality and API remain unchanged—only the version number format has been updated.
+
+---
+
 ### 🛡️ Branch Protection Policy
 
 The `main` branch of **GroundingDINO-CU128** is fully protected to maintain build integrity and code quality.
@@ -108,9 +143,9 @@ The optional `shadow_dino` wrapper namespace provides:
 
 ## Installation
 
-> **⚠️ IMPORTANT: CUDA Toolkit Required**
+> **⚠️ IMPORTANT: CUDA Toolkit and C++17 Compiler Required**
 >
-> This package requires the **NVIDIA CUDA Toolkit** to be installed on your system **BEFORE** installation.
+> This package requires the **NVIDIA CUDA Toolkit** and a **C++17 compatible compiler** to be installed on your system **BEFORE** installation.
 > The package includes CUDA extensions that must be compiled during `pip install`.
 >
 > **Install CUDA Toolkit first:**
@@ -118,7 +153,12 @@ The optional `shadow_dino` wrapper namespace provides:
 > - Set `CUDA_HOME` environment variable (e.g., `export CUDA_HOME=/usr/local/cuda`)
 > - Verify: `nvcc --version`
 >
-> **Without CUDA toolkit installed, the installation will fail.**
+> **Install C++17 compatible compiler:**
+> - **Windows**: Visual Studio 2019+ with "Desktop development with C++" workload
+> - **Linux**: `sudo apt-get install build-essential` (GCC 7+) or install Clang 5+
+> - **macOS**: `xcode-select --install` (installs Clang with C++17 support)
+>
+> **Without CUDA toolkit and C++17 compiler, the installation will fail with `NameError: name '_C' is not defined` errors.**
 
 ### From PyPI (Recommended)
 
@@ -129,13 +169,20 @@ pip install groundingdino-cu128
 
 ### From Source
 
-If you have a CUDA environment, please make sure the environment variable `CUDA_HOME` is set. It will be compiled under CPU-only mode if no CUDA available.
+If you have a CUDA environment, please make sure:
+1. The environment variable `CUDA_HOME` is set
+2. A C++17 compatible compiler is installed and available in your PATH
+3. The compiler is properly configured for CUDA compilation
+
+It will be compiled under CPU-only mode if no CUDA is available.
 
 ```bash
 git clone https://github.com/ghostcipher1/groundingdino-cu128.git
 cd groundingdino-cu128
 pip install -e .
 ```
+
+**Note:** The build process will automatically use C++17 (`-std=c++17` on Linux/macOS, `/std:c++17` on Windows) for both C++ and CUDA compilation. If compilation fails, verify your compiler supports C++17.
 
 ### Optional Extras
 
@@ -176,9 +223,15 @@ The `constraints.txt` file pins specific versions of dependencies that have been
 ### Requirements
 
 - **NVIDIA CUDA Toolkit 12.6 or 12.8** (required before installation)
+- **C++17 compatible compiler** (REQUIRED for CUDA extension compilation)
+  - Windows: Visual Studio 2019+ with C++ build tools (MSVC 19.20+)
+  - Linux: GCC 7+ or Clang 5+
+  - macOS: Xcode Command Line Tools (Clang 5+)
 - Python >= 3.9
 - PyTorch >= 2.7.0, < 2.8
 - CUDA-capable GPU (for GPU acceleration)
+
+**Important:** C++17 is mandatory for compiling CUDA extensions. Without a C++17-compatible compiler, the `_C` module will fail to compile, resulting in `NameError: name '_C' is not defined` errors at runtime.
 
 ## Docker
 
@@ -215,7 +268,7 @@ The Docker image includes:
 
 - `latest` - Latest stable release
 - `edge` - Latest build from main branch
-- `v0.2.0` - Specific version tags
+- `v2025.2.0` - Specific version tags
 - `main-<sha>` - Commit-specific builds
 
 ### Building Locally
