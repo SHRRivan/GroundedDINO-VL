@@ -109,6 +109,7 @@ docs/_build/
 docs/_static/
 docs/_templates/
 docs/PYPI_RELEASE_GUIDE.md
+no_pub_docs/*
 Dockerfile.testpypi.standalone
 
 # CI/CD
@@ -137,3 +138,11 @@ $RECYCLE.BIN/
 # Project specific
 UNKNOWN.egg-info/
 VERSION_ANALYSIS.md
+
+# Internal documentation and summaries
+groundeddino_vl/summaries/
+internal_docs/
+docs/TESTING_C_EXTENSION.md
+
+# Demo outputs
+demo/outputs/
