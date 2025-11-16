@@ -19,6 +19,24 @@
 # https://github.com/open-mmlab/mmdetection/blob/master/setup.py
 # https://github.com/Oneflow-Inc/libai/blob/main/setup.py
 # ------------------------------------------------------------------------------------------------
+#
+# IMPORTANT: Installation for CUDA Extension Building
+# ========================================================
+# To ensure the CUDA extension (_C module) is properly built with your environment's
+# PyTorch and CUDA versions, use:
+#
+#   python -m pip install -e . --no-build-isolation
+#
+# The --no-build-isolation flag is critical because:
+# - It uses your pre-installed PyTorch and CUDA toolkit
+# - Avoids downloading/installing CUDA again during build
+# - Ensures ABI compatibility between extension and runtime
+# - Prevents "Undefined backend" errors in multi-scale deformable attention kernel
+#
+# Without --no-build-isolation, the extension may be compiled against different
+# PyTorch/CUDA versions than your runtime environment, causing device type resolution
+# failures when running inference on GPU.
+# ------------------------------------------------------------------------------------------------
 
 import glob
 import os
@@ -39,9 +57,9 @@ except ImportError:
     CppExtension = None
     CUDAExtension = None
 
-# groundingdino version info
+# GroundedDINO-VL version info
 version = "2025.11.0"
-package_name = "groundingdino-cu128"
+package_name = "groundeddino-vl"
 cwd = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -53,7 +71,8 @@ except Exception:
 
 
 def write_version_file():
-    version_path = os.path.join(cwd, "groundingdino", "version.py")
+    # Write version to GroundedDINO-VL package
+    version_path = os.path.join(cwd, "groundeddino_vl", "version.py")
     with open(version_path, "w") as f:
         f.write(f"__version__ = '{version}'\n")
         # f.write(f"git_version = {repr(sha)}\n")
@@ -256,7 +275,7 @@ def check_prerequisites():
     
     # Use ASCII-safe characters for Windows compatibility
     print("\n" + "="*70)
-    print("Checking prerequisites for groundingdino-cu128 installation...")
+    print("Checking prerequisites for GroundedDINO-VL installation...")
     print("="*70)
     
     cuda_check = check_cuda_toolkit()
@@ -360,7 +379,7 @@ def get_extensions():
         return []
 
     this_dir = os.path.dirname(os.path.abspath(__file__))
-    extensions_dir = os.path.join(this_dir, "groundingdino", "models", "GroundingDINO", "csrc")
+    extensions_dir = os.path.join(this_dir, "groundeddino_vl", "ops", "csrc")
 
     main_source = os.path.join(extensions_dir, "vision.cpp")
     sources = glob.glob(os.path.join(extensions_dir, "**", "*.cpp"))
@@ -441,12 +460,12 @@ def get_extensions():
         extra_compile_args["nvcc"] = []
         return []
 
-    sources = [os.path.join(extensions_dir, s) for s in sources]
-    include_dirs = [extensions_dir]
+    sources = [os.path.relpath(s, cwd) for s in sources]
+    include_dirs = [os.path.relpath(extensions_dir, cwd)]
 
     ext_modules = [
         extension(
-            "groundingdino._C",
+            "groundeddino_vl._C",
             sources,
             include_dirs=include_dirs,
             define_macros=define_macros,

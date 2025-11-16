@@ -3,9 +3,9 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "groundingdino-cu128"
+name = "groundeddino-vl"
 version = "2025.11.0"
-description = "Upgraded GroundingDINO for PyTorch 2.7 + CUDA 12.8 (maintained fork)"
+description = "GroundedDINO-VL - Modern Vision-Language Foundation Models for PyTorch 2.7 + CUDA 12.8"
 readme = "README.md"
 license = { text = "Apache-2.0" }
 requires-python = ">=3.9"
@@ -16,13 +16,16 @@ maintainers = [
     { name = "ghostcipher1", email = "ghostcipher1@users.noreply.github.com" }
 ]
 keywords = [
+    "groundeddino-vl",
+    "groundeddino_vl",
     "computer-vision",
     "object-detection",
     "grounding",
-    "dino",
+    "vision-language",
     "transformer",
     "pytorch",
-    "cuda"
+    "cuda",
+    "groundingdino"
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -47,7 +50,7 @@ dependencies = [
     "timm>=0.6",
     "numpy>=1.19",
     "opencv-python>=4.5",
-    "supervision>=0.4.0",
+    "supervision>=0.26.1",
     "pycocotools>=2.0",
 ]
 
@@ -79,23 +82,24 @@ jetson = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/ghostcipher1/groundingdino-cu128"
-Repository = "https://github.com/ghostcipher1/groundingdino-cu128"
-"Issue Tracker" = "https://github.com/ghostcipher1/groundingdino-cu128/issues"
-Documentation = "https://github.com/ghostcipher1/groundingdino-cu128#readme"
+Homepage = "https://github.com/ghostcipher1/GroundedDINO-VL"
+Repository = "https://github.com/ghostcipher1/GroundedDINO-VL"
+"Issue Tracker" = "https://github.com/ghostcipher1/GroundedDINO-VL/issues"
+Documentation = "https://github.com/ghostcipher1/GroundedDINO-VL#readme"
 "Original Source" = "https://github.com/IDEA-Research/GroundingDINO"
+"Legacy Fork" = "https://github.com/ghostcipher1/groundingdino-cu128"
 
 [tool.setuptools]
 zip-safe = false
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["groundingdino*", "shadow_dino*"]
+include = ["groundeddino_vl*", "groundingdino*"]
 exclude = ["tests*", "demo*", "configs*"]
 
 [tool.setuptools.package-data]
-groundingdino = ["**/*.cu", "**/*.cpp", "**/*.h", "**/*.py"]
-shadow_dino = ["**/*.py"]
+groundeddino_vl = ["**/*.cu", "**/*.cpp", "**/*.h", "**/*.cuh", "**/*.py"]
+groundingdino = ["**/*.py"]
 
 # ============================================================================
 # C++17 Extension Build Configuration
@@ -123,10 +127,18 @@ shadow_dino = ["**/*.py"]
 #   - With PyTorch + CUDA: Builds CUDA-enabled _C extension
 #   - With PyTorch - CUDA: Returns empty extension list (CPU-only mode)
 #
-# To build with non-isolated environment (recommended for development):
-#   python -m build --no-isolation
+# Installation and Build Commands:
 #
-# This allows using pre-installed PyTorch and avoids CUDA installation during build.
+#   Development installation (recommended):
+#   python -m pip install -e . --no-build-isolation
+#   Ensures extension is built with current environment's PyTorch/CUDA versions.
+#
+#   Build distribution with non-isolated environment:
+#   python -m build --no-isolation
+#   Allows using pre-installed PyTorch and avoids CUDA installation during build.
+#
+#   Standard installation (may skip extension if environment mismatches):
+#   pip install .
 # ============================================================================
 
 # Pytest configuration
@@ -140,7 +152,7 @@ python_functions = ["test_*"]
 
 # Coverage configuration
 [tool.coverage.run]
-source = ["groundingdino", "shadow_dino"]
+source = ["groundeddino_vl", "groundingdino"]
 omit = [
     "*/tests/*",
     "*/demo/*",

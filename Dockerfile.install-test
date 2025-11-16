@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y \
     python3.10 \
     python3.10-dev \
     python3-pip \
+    libgl1 libglib2.0-0 \
     git \
     wget \
     build-essential \

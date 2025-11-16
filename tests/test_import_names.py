@@ -1,9 +1,9 @@
 """
-Tests to verify that both import paths work correctly.
+Tests to verify backward compatibility import paths work correctly.
 
 This test suite ensures:
-1. The canonical groundingdino import works
-2. The wrapper shadow_dino import works
+1. The canonical groundeddino_vl import works (recommended)
+2. The legacy groundingdino import works (backward compatibility)
 3. Both namespaces reference the same underlying modules
 4. The CUDA extension is accessible through both namespaces
 """
@@ -11,8 +11,21 @@ This test suite ensures:
 import pytest
 
 
+def test_import_groundeddino_vl():
+    """Test that groundeddino_vl can be imported."""
+    import groundeddino_vl
+
+    # Should have version
+    assert hasattr(groundeddino_vl, "__version__"), "groundeddino_vl missing __version__"
+    assert groundeddino_vl.__version__ == "2025.11.0"
+
+    # Verify core functions are available
+    assert hasattr(groundeddino_vl, "load_model"), "groundeddino_vl missing load_model"
+    assert hasattr(groundeddino_vl, "predict"), "groundeddino_vl missing predict"
+
+
 def test_import_groundingdino():
-    """Test that groundingdino can be imported."""
+    """Test that groundingdino can be imported (legacy compatibility)."""
     import groundingdino
 
     # Verify core modules can be imported
@@ -23,45 +36,21 @@ def test_import_groundingdino():
     assert util is not None, "util module not found"
 
 
-def test_import_shadow_dino():
-    """Test that shadow_dino wrapper can be imported."""
-    import shadow_dino
-
-    # Should re-export version
-    assert hasattr(shadow_dino, "__version__"), "shadow_dino missing __version__"
-    assert shadow_dino.__version__ == "2025.11.0"
-
-    # Should have cuda availability flag
-    assert hasattr(shadow_dino, "__cuda_available__"), "shadow_dino missing __cuda_available__"
-
-    # Should re-export core modules
-    assert hasattr(shadow_dino, "models"), "shadow_dino missing models"
-    assert hasattr(shadow_dino, "util"), "shadow_dino missing util"
-
-
-def test_shadow_dino_models_import():
-    """Test that models can be accessed through shadow_dino."""
-    import shadow_dino
-
-    # Verify we can access models through the wrapper
-    assert hasattr(shadow_dino, "models"), "shadow_dino missing models"
-    assert shadow_dino.models is not None
-
-
-def test_both_namespaces_reference_same_modules():
-    """Test that both namespaces reference the same underlying implementation."""
+def test_groundingdino_references_groundeddino_vl():
+    """Test that groundingdino properly re-exports from groundeddino_vl."""
     import groundingdino
-    import shadow_dino
+    import groundeddino_vl
+
+    # Both should have the same version
+    assert groundingdino.__version__ == groundeddino_vl.__version__
 
     # Both should reference the same models module
-    assert shadow_dino.models is groundingdino.models
+    assert groundingdino.models is groundeddino_vl.models
 
-    # Both should reference the same util module
-    assert shadow_dino.util is groundingdino.util
-
-    # Both should reference the same CUDA extension if available
-    if hasattr(shadow_dino, "_C") and hasattr(groundingdino, "_C"):
-        assert shadow_dino._C is groundingdino._C
+    # Both should have util and utils available (may be separate module instances
+    # for the legacy compatibility shim)
+    assert hasattr(groundingdino, 'util'), "groundingdino missing util"
+    assert hasattr(groundeddino_vl, 'utils'), "groundeddino_vl missing utils"
 
 
 def test_cuda_extension_loadable():

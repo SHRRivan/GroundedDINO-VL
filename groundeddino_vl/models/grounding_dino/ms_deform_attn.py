@@ -27,26 +27,35 @@ from torch.nn.init import constant_, xavier_uniform_
 
 _C = None
 _C_AVAILABLE = False
+_C_IMPORT_ATTEMPTED = False
 
 
 def _load_c_extension():
-    global _C, _C_AVAILABLE
+    global _C, _C_AVAILABLE, _C_IMPORT_ATTEMPTED
     
-    if _C is not None:
-        return
+    if _C_IMPORT_ATTEMPTED:
+        return _C_AVAILABLE
+    
+    _C_IMPORT_ATTEMPTED = True
     
     try:
         from groundeddino_vl import _C as _c_ext
         _C = _c_ext
         _C_AVAILABLE = True
-    except ImportError:
-        try:
-            from groundingdino import _C as _c_ext
-            _C = _c_ext
-            _C_AVAILABLE = True
-        except ImportError:
-            warnings.warn("Failed to load custom C++ ops. Running on CPU mode Only!")
-            _C_AVAILABLE = False
+    except ImportError as e:
+        warnings.warn(
+            f"Failed to load custom C++ ops (ImportError: {e}). "
+            f"Falling back to PyTorch implementation. "
+            f"For GPU acceleration, rebuild with CUDA support: "
+            f"python -m build && pip install -e ."
+        )
+    except Exception as e:
+        warnings.warn(
+            f"Failed to load custom C++ ops ({type(e).__name__}: {e}). "
+            f"Falling back to PyTorch implementation."
+        )
+    
+    return _C_AVAILABLE
 
 
 # helpers
@@ -67,6 +76,11 @@ class MultiScaleDeformableAttnFunction(Function):
         attention_weights,
         im2col_step,
     ):
+        if not _load_c_extension():
+            raise RuntimeError(
+                "MultiScaleDeformableAttnFunction requires C++ ops, but they are not available. "
+                "Use the PyTorch fallback implementation instead or rebuild with CUDA support."
+            )
         ctx.im2col_step = im2col_step
         output = _C.ms_deform_attn_forward(
             value,
@@ -288,8 +302,6 @@ class MultiScaleDeformableAttention(nn.Module):
             torch.Tensor: forward results with shape `(num_query, bs, embed_dim)`
         """
 
-        _load_c_extension()
-
         if value is None:
             value = query
 
@@ -347,6 +359,7 @@ class MultiScaleDeformableAttention(nn.Module):
                 )
             )
     
+        _load_c_extension()
         if torch.cuda.is_available() and value.is_cuda and _C_AVAILABLE:
             halffloat = False
             if value.dtype == torch.float16:

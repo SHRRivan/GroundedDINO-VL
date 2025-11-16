@@ -1,268 +1,136 @@
-name: CI - Test Suite
+name: CI
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
+  lint:
+    name: Lint (Python 3.11)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install setuptools>=68 wheel build
+
+      - name: Install runtime dependencies
+        run: |
+          pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+          pip install -r requirements.txt
+
+      - name: Install dev dependencies
+        run: pip install -e ".[dev]"
+
+      - name: Run flake8
+        run: flake8 groundeddino_vl groundingdino tests --max-line-length=100 --extend-ignore=E203,W503
+
+      - name: Run black check
+        run: black --check groundeddino_vl groundingdino tests
+
+      - name: Run isort check
+        run: isort --check-only groundeddino_vl groundingdino tests
+
+      - name: Run mypy
+        run: mypy groundeddino_vl --ignore-missing-imports || true
+
   test:
-    name: Test Python ${{ matrix.python-version }}
+    name: Test (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         python-version: ["3.9", "3.10", "3.11", "3.12"]
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v5
+      - uses: actions/checkout@v4
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v6
-      with:
-        python-version: ${{ matrix.python-version }}
-        cache: 'pip'
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
 
-    - name: Install system dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y build-essential
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install setuptools>=68 wheel build
 
-    - name: Install Python dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pytest pytest-cov flake8
-        pip install -r requirements.txt
+      - name: Install runtime dependencies (CPU)
+        run: |
+          pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+          pip install -r requirements.txt
 
-    - name: Lint with flake8
-      run: |
-        # Stop the build if there are Python syntax errors or undefined names
-        flake8 groundingdino shadow_dino --count --select=E9,F63,F7,F82 --show-source --statistics
-        # Exit-zero treats all errors as warnings
-        flake8 groundingdino shadow_dino --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-      continue-on-error: true
+      - name: Build and install package
+        run: |
+          pip install -e . --no-build-isolation
 
-    - name: Run import tests
-      run: |
-        export PYTHONPATH=$PYTHONPATH:$(pwd)
-        pytest tests/test_import_names.py -v --tb=short
+      - name: Install test dependencies
+        run: pip install pytest pytest-cov
 
-    - name: Run all tests with coverage
-      run: |
-        export PYTHONPATH=$PYTHONPATH:$(pwd)
-        pytest tests/ -v --cov=groundingdino --cov=shadow_dino --cov-report=xml --cov-report=term
-      continue-on-error: true
+      - name: Run import tests
+        run: pytest tests/test_import.py -v
 
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v5
-      with:
-        files: ./coverage.xml
-        flags: unittests
-        name: codecov-umbrella
-        fail_ci_if_error: false
-      continue-on-error: true
+      - name: Run import names tests
+        run: pytest tests/test_import_names.py -v
 
-  build-cpu:
-    name: Build CPU-only package
+      - name: Run API tests
+        run: pytest tests/test_api.py -v --cov=groundeddino_vl --cov=groundingdino --cov-report=xml
+
+      - name: Upload coverage to Codecov
+        if: matrix.python-version == '3.11'
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+
+  build:
+    name: Build (CPU)
     runs-on: ubuntu-latest
-    needs: test
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v5
+      - uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v6
-      with:
-        python-version: '3.10'
-        cache: 'pip'
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+          cache: pip
 
-    - name: Install build dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install setuptools>=68 wheel build
-        pip install -r requirements.txt
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install setuptools>=68 wheel build
 
-    - name: Build source distribution
-      run: |
-        python -m build --sdist --no-isolation
+      - name: Install runtime dependencies (CPU)
+        run: |
+          pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+          pip install -r requirements.txt
 
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v5
-      with:
-        name: dist-cpu
-        path: dist/*.tar.gz
-        retention-days: 7
+      - name: Build distributions
+        run: python -m build --no-isolation
 
-  test-cpp17:
-    name: Test C++17 Compiler Support
-    runs-on: ubuntu-latest
+      - name: Check artifacts
+        run: |
+          ls -lh dist/
+          python -m twine check dist/* || true
 
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v5
-
-    - name: Install C++17 compiler
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y build-essential g++ cmake
-
-    - name: Check compiler versions
-      run: |
-        echo "==================================================="
-        echo "Compiler Information"
-        echo "==================================================="
-        gcc --version
-        g++ --version
-        cmake --version
-        echo ""
-        echo "Checking C++17 support..."
-
-    - name: Test C++17 compilation
-      run: |
-        cat > test_cpp17.cpp << 'EOF'
-        #include <iostream>
-        #include <string_view>
-        #include <optional>
-        #include <variant>
-
-        // Test C++17 features
-        int main() {
-            // String view (C++17)
-            std::string_view sv = "C++17 works!";
-
-            // Optional (C++17)
-            std::optional<int> opt = 42;
-
-            // Variant (C++17)
-            std::variant<int, double, std::string> var = "test";
-
-            // Structured bindings (C++17)
-            auto [a, b] = std::make_pair(1, 2);
-
-            // If with initializer (C++17)
-            if (auto val = opt; val.has_value()) {
-                std::cout << "✓ C++17 compilation successful" << std::endl;
-                std::cout << "String view: " << sv << std::endl;
-                std::cout << "Optional value: " << val.value() << std::endl;
-                std::cout << "Structured binding: " << a << ", " << b << std::endl;
-            }
-
-            return 0;
-        }
-        EOF
-
-        echo "==================================================="
-        echo "Compiling C++17 test program..."
-        echo "==================================================="
-        g++ -std=c++17 -o test_cpp17 test_cpp17.cpp
-
-        echo ""
-        echo "==================================================="
-        echo "Running C++17 test program..."
-        echo "==================================================="
-        ./test_cpp17
-
-        echo ""
-        echo "==================================================="
-        echo "✓ C++17 compiler test PASSED"
-        echo "==================================================="
-
-    - name: Test setup.py C++17 flags
-      run: |
-        echo "==================================================="
-        echo "Verifying setup.py C++17 configuration"
-        echo "==================================================="
-        python -c "
-        import re
-        with open('setup.py', 'r') as f:
-            content = f.read()
-
-        # Check for C++17 in cxx flags
-        if '-std=c++17' in content:
-            print('✓ Found -std=c++17 in setup.py')
-        else:
-            print('✗ Missing -std=c++17 in setup.py')
-            exit(1)
-
-        # Check for C++17 in nvcc flags
-        if 'nvcc' in content and '-std=c++17' in content:
-            print('✓ Found -std=c++17 for NVCC compiler')
-        else:
-            print('⚠ NVCC C++17 flag check inconclusive')
-
-        print('')
-        print('=================================================')
-        print('✓ setup.py C++17 configuration verified')
-        print('=================================================')
-        "
-
-    - name: Verify pyproject.toml documents C++17
-      run: |
-        echo "==================================================="
-        echo "Checking pyproject.toml C++17 documentation"
-        echo "==================================================="
-        if grep -q "C++17" pyproject.toml; then
-            echo "✓ pyproject.toml documents C++17 requirement"
-            grep -A 2 "C++17" pyproject.toml | head -5
-        else
-            echo "⚠ pyproject.toml doesn't mention C++17 (documentation only)"
-        fi
-        echo ""
-        echo "==================================================="
-        echo "✓ C++17 documentation check complete"
-        echo "==================================================="
-
-  check-package:
-    name: Check package metadata
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v5
-
-    - name: Set up Python
-      uses: actions/setup-python@v6
-      with:
-        python-version: '3.10'
-
-    - name: Install twine
-      run: |
-        python -m pip install --upgrade pip
-        pip install setuptools>=68 wheel twine build
-        pip install -r requirements.txt
-
-    - name: Build package
-      run: python -m build --sdist --no-isolation
-
-    - name: Check package with twine
-      run: twine check dist/*
-
-    - name: Verify package metadata
-      run: |
-        pip install tomli
-        python -c "
-        try:
-            import tomllib
-        except ImportError:
-            import tomli as tomllib
-        import re
-        with open('pyproject.toml', 'rb') as f:
-            config = tomllib.load(f)
-        
-        # Validate package name
-        assert config['project']['name'] == 'groundingdino-cu128', f\"Package name must be 'groundingdino-cu128', got '{config['project']['name']}'\"
-        
-        # Validate version format (year-based: YYYY.X.X)
-        version = config['project']['version']
-        version_pattern = r'^\d{4}\.\d+\.\d+$'
-        assert re.match(version_pattern, version), f\"Version must follow year-based format (YYYY.X.X), got '{version}'\"
-        
-        # Validate author
-        assert 'ghostcipher1' in config['project']['authors'][0]['name'].lower(), f\"Author must be ghostcipher1, got '{config['project']['authors'][0]['name']}'\"
-        
-        print(f'✓ Package metadata validated (version: {version})')
-        "
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: dist/

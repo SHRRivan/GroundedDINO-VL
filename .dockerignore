@@ -41,6 +41,8 @@ ENV/
 docs/
 *.md
 !README.md
+internal_docs/
+*.md
 
 # Tests
 tests/
