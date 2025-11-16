@@ -1,0 +1,31 @@
+# Include package data
+include README.md
+include LICENSE
+include requirements.txt
+include pyproject.toml
+include setup.py
+
+# Include all Python source files in groundeddino_vl
+recursive-include groundeddino_vl *.py
+recursive-include groundeddino_vl *.cu
+recursive-include groundeddino_vl *.cpp
+recursive-include groundeddino_vl *.h
+recursive-include groundeddino_vl *.cuh
+
+# Explicitly include the data module
+recursive-include groundeddino_vl/data *.py
+
+# Include all Python source files in groundingdino (legacy compatibility)
+recursive-include groundingdino *.py
+
+# Exclude test, demo, and config files
+recursive-exclude tests *
+recursive-exclude demo *
+recursive-exclude configs *
+recursive-exclude docs *
+
+# Exclude compiled files and caches
+global-exclude __pycache__
+global-exclude *.py[cod]
+global-exclude *.so
+global-exclude .gitignore

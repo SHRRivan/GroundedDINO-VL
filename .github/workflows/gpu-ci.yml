@@ -28,11 +28,6 @@ jobs:
           echo "VIRTUAL_ENV=$(pwd)/gpu_test_venv" >> $GITHUB_ENV
           echo "$(pwd)/gpu_test_venv/bin" >> $GITHUB_PATH
 
-      - name: Verify CUDA availability
-        run: |
-          source gpu_test_venv/bin/activate
-          python -c "import torch; print(f'PyTorch version: {torch.__version__}'); print(f'CUDA available: {torch.cuda.is_available()}'); print(f'CUDA device count: {torch.cuda.device_count()}')"
-
       - name: Install build dependencies
         run: |
           source gpu_test_venv/bin/activate
@@ -43,6 +38,11 @@ jobs:
           source gpu_test_venv/bin/activate
           pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
           pip install -r requirements.txt
+
+      - name: Verify CUDA availability
+        run: |
+          source gpu_test_venv/bin/activate
+          python -c "import torch; print(f'PyTorch version: {torch.__version__}'); print(f'CUDA available: {torch.cuda.is_available()}'); print(f'CUDA device count: {torch.cuda.device_count()}')"
 
       - name: Build and install package from source
         run: |

@@ -85,10 +85,12 @@ logs/
 *.pt
 *.ckpt
 *.weights
-data/
+/data/
 /datasets/
 checkpoints/
 weights/
+!groundeddino_vl/data/
+!groundingdino/datasets/
 
 # IDE
 .vscode/
