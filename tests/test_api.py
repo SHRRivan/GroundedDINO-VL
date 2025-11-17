@@ -11,22 +11,20 @@ Author: GroundedDINO-VL Team
 License: Apache 2.0
 """
 
-import unittest
-from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
 import tempfile
+import unittest
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 import torch
 from PIL import Image
 
 from groundeddino_vl import (
+    DetectionResult,
+    annotate,
     load_model,
     predict,
-    load_image,
     preprocess_image,
-    annotate,
-    DetectionResult,
 )
 
 
@@ -35,10 +33,12 @@ class TestDetectionResult(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures"""
-        self.boxes = torch.tensor([
-            [0.5, 0.5, 0.2, 0.3],  # cxcywh format
-            [0.3, 0.7, 0.1, 0.2],
-        ])
+        self.boxes = torch.tensor(
+            [
+                [0.5, 0.5, 0.2, 0.3],  # cxcywh format
+                [0.3, 0.7, 0.1, 0.2],
+            ]
+        )
         self.labels = ["car", "person"]
         self.scores = torch.tensor([0.95, 0.87])
         self.image_size = (480, 640)  # H, W
@@ -46,10 +46,7 @@ class TestDetectionResult(unittest.TestCase):
     def test_creation(self):
         """Test creating a DetectionResult"""
         result = DetectionResult(
-            boxes=self.boxes,
-            labels=self.labels,
-            scores=self.scores,
-            image_size=self.image_size
+            boxes=self.boxes, labels=self.labels, scores=self.scores, image_size=self.image_size
         )
 
         self.assertEqual(len(result), 2)
@@ -60,10 +57,7 @@ class TestDetectionResult(unittest.TestCase):
     def test_to_xyxy_normalized(self):
         """Test converting boxes to xyxy format (normalized)"""
         result = DetectionResult(
-            boxes=self.boxes,
-            labels=self.labels,
-            scores=self.scores,
-            image_size=self.image_size
+            boxes=self.boxes, labels=self.labels, scores=self.scores, image_size=self.image_size
         )
 
         boxes_xyxy = result.to_xyxy(denormalize=False)
@@ -78,10 +72,7 @@ class TestDetectionResult(unittest.TestCase):
     def test_to_xyxy_denormalized(self):
         """Test converting boxes to pixel coordinates"""
         result = DetectionResult(
-            boxes=self.boxes,
-            labels=self.labels,
-            scores=self.scores,
-            image_size=self.image_size
+            boxes=self.boxes, labels=self.labels, scores=self.scores, image_size=self.image_size
         )
 
         boxes_xyxy = result.to_xyxy(denormalize=True)
@@ -96,20 +87,12 @@ class TestDetectionResult(unittest.TestCase):
 
     def test_len(self):
         """Test __len__ method"""
-        result = DetectionResult(
-            boxes=self.boxes,
-            labels=self.labels,
-            scores=self.scores
-        )
+        result = DetectionResult(boxes=self.boxes, labels=self.labels, scores=self.scores)
         self.assertEqual(len(result), 2)
 
     def test_repr(self):
         """Test __repr__ method"""
-        result = DetectionResult(
-            boxes=self.boxes,
-            labels=self.labels,
-            scores=self.scores
-        )
+        result = DetectionResult(boxes=self.boxes, labels=self.labels, scores=self.scores)
         repr_str = repr(result)
         self.assertIn("DetectionResult", repr_str)
         self.assertIn("car", repr_str)
@@ -133,7 +116,7 @@ class TestPreprocessImage(unittest.TestCase):
 
     def test_preprocess_pil_image(self):
         """Test preprocessing a PIL image"""
-        image_pil = Image.new('RGB', (640, 480), color='red')
+        image_pil = Image.new("RGB", (640, 480), color="red")
 
         tensor = preprocess_image(image_pil)
 
@@ -162,9 +145,9 @@ class TestPreprocessImage(unittest.TestCase):
 class TestAPIIntegration(unittest.TestCase):
     """Integration tests for the public API (with mocking)"""
 
-    @patch('groundeddino_vl.api.build_model')
-    @patch('groundeddino_vl.api.SLConfig')
-    @patch('groundeddino_vl.api.torch.load')
+    @patch("groundeddino_vl.api.build_model")
+    @patch("groundeddino_vl.api.SLConfig")
+    @patch("groundeddino_vl.api.torch.load")
     def test_load_model(self, mock_torch_load, mock_slconfig, mock_build_model):
         """Test load_model function"""
         # Set up mocks
@@ -174,17 +157,17 @@ class TestAPIIntegration(unittest.TestCase):
         mock_model = MagicMock()
         mock_build_model.return_value = mock_model
 
-        mock_checkpoint = {'model': {'layer1.weight': torch.randn(10, 10)}}
+        mock_checkpoint = {"model": {"layer1.weight": torch.randn(10, 10)}}
         mock_torch_load.return_value = mock_checkpoint
 
         # Call load_model
-        with tempfile.NamedTemporaryFile(suffix='.py') as config_file, \
-             tempfile.NamedTemporaryFile(suffix='.pth') as checkpoint_file:
+        with (
+            tempfile.NamedTemporaryFile(suffix=".py") as config_file,
+            tempfile.NamedTemporaryFile(suffix=".pth") as checkpoint_file,
+        ):
 
             model = load_model(
-                config_path=config_file.name,
-                checkpoint_path=checkpoint_file.name,
-                device='cpu'
+                config_path=config_file.name, checkpoint_path=checkpoint_file.name, device="cpu"
             )
 
         # Verify behavior
@@ -192,7 +175,7 @@ class TestAPIIntegration(unittest.TestCase):
         mock_build_model.assert_called_once()
         mock_model.load_state_dict.assert_called_once()
         mock_model.eval.assert_called_once()
-        mock_model.to.assert_called_once_with('cpu')
+        mock_model.to.assert_called_once_with("cpu")
 
     def test_predict_with_mock_model(self):
         """Test predict function with a mock model"""
@@ -202,16 +185,16 @@ class TestAPIIntegration(unittest.TestCase):
 
         # Mock model output
         mock_outputs = {
-            'pred_logits': torch.rand(1, 10, 256),
-            'pred_boxes': torch.rand(1, 10, 4),
+            "pred_logits": torch.rand(1, 10, 256),
+            "pred_boxes": torch.rand(1, 10, 4),
         }
 
-        with patch('groundeddino_vl.api._predict_internal') as mock_predict:
+        with patch("groundeddino_vl.api._predict_internal") as mock_predict:
             # Mock internal predict to return simple results
             mock_predict.return_value = (
                 torch.tensor([[0.5, 0.5, 0.2, 0.3]]),  # boxes
                 torch.tensor([0.95]),  # scores
-                ["car"]  # labels
+                ["car"],  # labels
             )
 
             # Create a test image
@@ -224,7 +207,7 @@ class TestAPIIntegration(unittest.TestCase):
                 text_prompt="car",
                 box_threshold=0.3,
                 text_threshold=0.25,
-                device='cpu'
+                device="cpu",
             )
 
             # Verify result
@@ -237,33 +220,32 @@ class TestAPIIntegration(unittest.TestCase):
         """Test predict with image file path"""
         mock_model = MagicMock()
 
-        with patch('groundeddino_vl.api.load_image') as mock_load_image, \
-             patch('groundeddino_vl.api._predict_internal') as mock_predict:
+        with (
+            patch("groundeddino_vl.api.load_image") as mock_load_image,
+            patch("groundeddino_vl.api._predict_internal") as mock_predict,
+        ):
 
             # Mock load_image
             mock_load_image.return_value = (
                 np.random.randint(0, 255, (480, 640, 3), dtype=np.uint8),
-                torch.randn(3, 480, 640)
+                torch.randn(3, 480, 640),
             )
 
             # Mock predict
             mock_predict.return_value = (
                 torch.tensor([[0.5, 0.5, 0.2, 0.3]]),
                 torch.tensor([0.95]),
-                ["car"]
+                ["car"],
             )
 
             # Create temporary image file
-            with tempfile.NamedTemporaryFile(suffix='.jpg') as img_file:
+            with tempfile.NamedTemporaryFile(suffix=".jpg") as img_file:
                 # Create a simple image
-                img = Image.new('RGB', (640, 480), color='red')
+                img = Image.new("RGB", (640, 480), color="red")
                 img.save(img_file.name)
 
                 result = predict(
-                    model=mock_model,
-                    image=img_file.name,
-                    text_prompt="car",
-                    device='cpu'
+                    model=mock_model, image=img_file.name, text_prompt="car", device="cpu"
                 )
 
             self.assertIsInstance(result, DetectionResult)
@@ -274,17 +256,13 @@ class TestAPIIntegration(unittest.TestCase):
         mock_model = MagicMock()
 
         with self.assertRaises(TypeError):
-            predict(
-                model=mock_model,
-                image=12345,  # Invalid type
-                text_prompt="car"
-            )
+            predict(model=mock_model, image=12345, text_prompt="car")  # Invalid type
 
 
 class TestAnnotate(unittest.TestCase):
     """Tests for the annotate function"""
 
-    @patch('groundeddino_vl.api._annotate_internal')
+    @patch("groundeddino_vl.api._annotate_internal")
     def test_annotate(self, mock_annotate_internal):
         """Test annotate function"""
         # Create test data
@@ -293,28 +271,25 @@ class TestAnnotate(unittest.TestCase):
             boxes=torch.tensor([[0.5, 0.5, 0.2, 0.3]]),
             labels=["car"],
             scores=torch.tensor([0.95]),
-            image_size=(480, 640)
+            image_size=(480, 640),
         )
 
         # Mock the internal annotate function
         mock_annotate_internal.return_value = image_np
 
         # Call annotate
-        annotated = annotate(image_np, result)
+        annotate(image_np, result)
 
         # Verify it called the internal function correctly
         mock_annotate_internal.assert_called_once_with(
-            image_source=image_np,
-            boxes=result.boxes,
-            logits=result.scores,
-            phrases=result.labels
+            image_source=image_np, boxes=result.boxes, logits=result.scores, phrases=result.labels
         )
 
 
 def run_tests():
     """Run all tests"""
-    unittest.main(argv=[''], verbosity=2, exit=False)
+    unittest.main(argv=[""], verbosity=2, exit=False)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

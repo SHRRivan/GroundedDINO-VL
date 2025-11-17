@@ -12,10 +12,10 @@ from timm.layers import DropPath
 
 
 class FeatureResizer(nn.Module):
-    """
+    r"""
     This class takes as input a set of embeddings of dimension C1 and outputs a set of
     embedding of dimension C2, after a linear transformation, dropout and normalization (LN).
-    """
+    r"""
 
     def __init__(self, input_feat_size, output_feat_size, dropout, do_ln=True):
         super().__init__()
@@ -48,10 +48,10 @@ def l2norm(X, dim, eps=1e-8):
 
 
 def func_attention(query, context, smooth=1, raw_feature_norm="softmax", eps=1e-8):
-    """
+    r"""
     query: (n_context, queryL, d)
     context: (n_context, sourceL, d)
-    """
+    r"""
     batch_size_q, queryL = query.size(0), query.size(1)
     batch_size, sourceL = context.size(0), context.size(1)
 

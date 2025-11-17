@@ -8,14 +8,14 @@
 # ------------------------------------------------------------------------
 
 from .backbone import Backbone, Joiner, build_backbone
-from .position_encoding import PositionEmbeddingSine, PositionEmbeddingLearned
+from .position_encoding import PositionEmbeddingLearned, PositionEmbeddingSine
 from .swin_transformer import SwinTransformer
 
 __all__ = [
-    'Backbone',
-    'Joiner',
-    'PositionEmbeddingSine',
-    'PositionEmbeddingLearned',
-    'SwinTransformer',
-    'build_backbone',
+    "Backbone",
+    "Joiner",
+    "PositionEmbeddingSine",
+    "PositionEmbeddingLearned",
+    "SwinTransformer",
+    "build_backbone",
 ]

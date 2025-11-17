@@ -30,7 +30,7 @@ class _ColorfulFormatter(logging.Formatter):
 # so that calling setup_logger multiple times won't add many handlers
 @functools.lru_cache()
 def setup_logger(output=None, distributed_rank=0, *, color=True, name="imagenet", abbrev_name=None):
-    """
+    r"""
     Initialize the detectron2 logger and set its verbosity level to "INFO".
 
     Args:
@@ -41,7 +41,7 @@ def setup_logger(output=None, distributed_rank=0, *, color=True, name="imagenet"
 
     Returns:
         logging.Logger: a logger
-    """
+    r"""
     logger = logging.getLogger(name)
     logger.setLevel(logging.DEBUG)
     logger.propagate = False

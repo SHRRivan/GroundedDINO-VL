@@ -39,7 +39,7 @@ class ConfigDict(Dict):
 
 
 class SLConfig(object):
-    """
+    r"""
     config files.
     only support .py file as config now.
 
@@ -61,7 +61,7 @@ class SLConfig(object):
         >>> cfg
         "Config [path: /home/kchen/projects/mmcv/tests/data/config/a.py]: "
         "{'item1': [1, 2], 'item2': {'a': 0}, 'item3': True, 'item4': 'test'}"
-    """
+    r"""
 
     @staticmethod
     def _validate_py_syntax(filename):
@@ -391,11 +391,11 @@ class SLConfig(object):
 
 
 class DictAction(Action):
-    """
+    r"""
     argparse action to split an argument into KEY=VALUE form
     on the first = and append to a dictionary. List options should
     be passed as comma separated values, i.e KEY=V1,V2,V3
-    """
+    r"""
 
     @staticmethod
     def _parse_int_float_bool(val):

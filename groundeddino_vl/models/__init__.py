@@ -17,16 +17,17 @@ def build_model(args):
 
     Returns:
         Built model instance
-    """
+    r"""
     # Import registry here to avoid circular imports
     from .registry import MODULE_BUILD_FUNCS
 
-    assert args.modelname in MODULE_BUILD_FUNCS._module_dict, \
-        f"Model {args.modelname} not found in registry"
+    assert (
+        args.modelname in MODULE_BUILD_FUNCS._module_dict
+    ), f"Model {args.modelname} not found in registry"
 
     build_func = MODULE_BUILD_FUNCS.get(args.modelname)
     model = build_func(args)
     return model
 
 
-__all__ = ['build_model', 'build_groundingdino']
+__all__ = ["build_model", "build_groundingdino"]

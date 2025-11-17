@@ -10,9 +10,10 @@ from pathlib import Path
 import yaml
 
 try:
-    from yaml import CLoader as Loader, CDumper as Dumper
+    from yaml import CDumper as Dumper
+    from yaml import CLoader as Loader
 except ImportError:
-    from yaml import Loader, Dumper
+    from yaml import Dumper, Loader
 
 
 # ===========================
@@ -103,7 +104,7 @@ def is_str(x):
     """Whether the input is an string instance.
 
     Note: This method is deprecated since python 2 is no longer supported.
-    """
+    r"""
     return isinstance(x, str)
 
 
@@ -122,7 +123,7 @@ def slload(file, file_format=None, **kwargs):
 
     Returns:
         The content from the file.
-    """
+    r"""
     if isinstance(file, Path):
         file = str(file)
     if file_format is None and is_str(file):
@@ -155,7 +156,7 @@ def sldump(obj, file=None, file_format=None, **kwargs):
 
     Returns:
         bool: True for success, False otherwise.
-    """
+    r"""
     if isinstance(file, Path):
         file = str(file)
     if file_format is None:

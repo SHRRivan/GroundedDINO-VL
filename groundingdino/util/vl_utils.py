@@ -13,10 +13,10 @@ def create_positive_map_from_span(tokenized, token_span, max_text_len=256):
             - attention_mask: Tensor[1, ntokens]
         - token_span: list with length num_boxes.
             - each item: [start_idx, end_idx]
-    """
+    r"""
     positive_map = torch.zeros((len(token_span), max_text_len), dtype=torch.float)
     for j, tok_list in enumerate(token_span):
-        for (beg, end) in tok_list:
+        for beg, end in tok_list:
             beg_pos = tokenized.char_to_token(beg)
             end_pos = tokenized.char_to_token(end - 1)
             if beg_pos is None:
@@ -47,7 +47,7 @@ def create_positive_map_from_span(tokenized, token_span, max_text_len=256):
 
 
 def build_captions_and_token_span(cat_list, force_lowercase):
-    """
+    r"""
     Return:
         captions: str
         cat2tokenspan: dict
@@ -55,7 +55,7 @@ def build_captions_and_token_span(cat_list, force_lowercase):
                 'dog': [[0, 2]],
                 ...
             }
-    """
+    r"""
 
     cat2tokenspan = {}
     captions = ""
@@ -92,7 +92,7 @@ def build_id2posspan_and_caption(category_dict: dict):
 
     Args:
         category_dict (dict): category_dict
-    """
+    r"""
     cat_list = [item["name"].lower() for item in category_dict]
     id2catname = {item["id"]: item["name"].lower() for item in category_dict}
     caption, cat2posspan = build_captions_and_token_span(cat_list, force_lowercase=True)

@@ -8,4 +8,4 @@ images and bounding boxes, useful for training and inference with GroundingDINO.
 
 from . import transforms
 
-__all__ = ['transforms']
+__all__ = ["transforms"]

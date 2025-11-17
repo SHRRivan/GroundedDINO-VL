@@ -15,39 +15,30 @@
 # Copyright (c) 2020 SenseTime. All Rights Reserved.
 # ------------------------------------------------------------------------
 import copy
-from typing import List, TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 import torch
 import torch.nn.functional as F
 from torch import nn
-from torchvision.ops.boxes import nms
-from transformers import AutoTokenizer, BertModel, BertTokenizer, RobertaModel, RobertaTokenizerFast
 
-from groundeddino_vl.utils import box_ops, get_tokenlizer
+from groundeddino_vl.utils import get_tokenlizer
 from groundeddino_vl.utils.misc import (
     NestedTensor,
-    accuracy,
-    get_world_size,
-    interpolate,
     inverse_sigmoid,
-    is_dist_avail_and_initialized,
     nested_tensor_from_tensor_list,
 )
-from groundeddino_vl.utils.utils import get_phrases_from_posmap
-from groundeddino_vl.utils.vl_utils import create_positive_map_from_span
 
 if TYPE_CHECKING:
-    from groundeddino_vl.utils.visualizer import COCOVisualizer
+    pass
 
 from ..registry import MODULE_BUILD_FUNCS
 from .backbone import build_backbone
 from .bert_wrapper import (
     BertModelWarper,
-    generate_masks_with_special_tokens,
     generate_masks_with_special_tokens_and_transfer_map,
 )
 from .transformer import build_transformer
-from .utils import MLP, ContrastiveEmbed, sigmoid_focal_loss
+from .utils import MLP, ContrastiveEmbed
 
 
 class GroundingDINO(nn.Module):

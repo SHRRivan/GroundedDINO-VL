@@ -9,4 +9,4 @@
 
 from .model import GroundingDINO, build_groundingdino
 
-__all__ = ['GroundingDINO', 'build_groundingdino']
+__all__ = ["GroundingDINO", "build_groundingdino"]

@@ -56,7 +56,7 @@ def get_sine_pos_embed(
 def gen_encoder_output_proposals(
     memory: Tensor, memory_padding_mask: Tensor, spatial_shapes: Tensor, learnedwh=None
 ):
-    """
+    r"""
     Input:
         - memory: bs, \sum{hw}, d_model
         - memory_padding_mask: bs, \sum{hw}
@@ -206,7 +206,7 @@ def gen_sineembed_for_position(pos_tensor):
     # sineembed_tensor = torch.zeros(n_query, bs, 256)
     scale = 2 * math.pi
     dim_t = torch.arange(128, dtype=torch.float32, device=pos_tensor.device)
-    dim_t = 10000 ** (2 * (torch.div(dim_t, 2, rounding_mode='floor')) / 128)
+    dim_t = 10000 ** (2 * (torch.div(dim_t, 2, rounding_mode="floor")) / 128)
     x_embed = pos_tensor[:, :, 0] * scale
     y_embed = pos_tensor[:, :, 1] * scale
     pos_x = x_embed[:, :, None] / dim_t

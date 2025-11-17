@@ -31,17 +31,19 @@ _C_AVAILABLE = False
 
 def _load_c_extension():
     global _C, _C_AVAILABLE
-    
+
     if _C is not None:
         return
-    
+
     try:
         from groundeddino_vl import _C as _c_ext
+
         _C = _c_ext
         _C_AVAILABLE = True
     except ImportError:
         try:
             from groundingdino import _C as _c_ext
+
             _C = _c_ext
             _C_AVAILABLE = True
         except ImportError:
@@ -167,7 +169,7 @@ class MultiScaleDeformableAttention(nn.Module):
             dropout (float): Dropout layer used in output. Default: 0.1.
         batch_first (bool): if ``True``, then the input and output tensor will be
             provided as `(bs, n, embed_dim)`. Default: False. `(n, bs, embed_dim)`
-    """
+    r"""
 
     def __init__(
         self,
@@ -257,9 +259,8 @@ class MultiScaleDeformableAttention(nn.Module):
         reference_points: Optional[torch.Tensor] = None,
         spatial_shapes: Optional[torch.Tensor] = None,
         level_start_index: Optional[torch.Tensor] = None,
-        **kwargs
+        **kwargs,
     ) -> torch.Tensor:
-
         """Forward Function of MultiScaleDeformableAttention
 
         Args:
@@ -346,7 +347,7 @@ class MultiScaleDeformableAttention(nn.Module):
                     reference_points.shape[-1]
                 )
             )
-    
+
         if torch.cuda.is_available() and value.is_cuda and _C_AVAILABLE:
             halffloat = False
             if value.dtype == torch.float16:
@@ -380,7 +381,7 @@ class MultiScaleDeformableAttention(nn.Module):
 
 
 def create_dummy_class(klass, dependency, message=""):
-    """
+    r"""
     When a dependency of a class is not available, create a dummy class which throws ImportError
     when used.
 
@@ -390,7 +391,7 @@ def create_dummy_class(klass, dependency, message=""):
         message: extra message to print
     Returns:
         class: a class object
-    """
+    r"""
     err = "Cannot import '{}', therefore '{}' is not available.".format(dependency, klass)
     if message:
         err = err + " " + message
@@ -409,7 +410,7 @@ def create_dummy_class(klass, dependency, message=""):
 
 
 def create_dummy_func(func, dependency, message=""):
-    """
+    r"""
     When a dependency of a function is not available, create a dummy function which throws
     ImportError when used.
 
@@ -419,7 +420,7 @@ def create_dummy_func(func, dependency, message=""):
         message: extra message to print
     Returns:
         function: a function object
-    """
+    r"""
     err = "Cannot import '{}', therefore '{}' is not available.".format(dependency, func)
     if message:
         err = err + " " + message

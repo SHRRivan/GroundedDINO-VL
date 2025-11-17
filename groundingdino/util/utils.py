@@ -172,7 +172,7 @@ def to_device(item, device):
 
 #
 def get_gaussian_mean(x, axis, other_axis, softmax=True):
-    """
+    r"""
 
     Args:
         x (float): Input images(BxCxHxW)
@@ -181,7 +181,7 @@ def get_gaussian_mean(x, axis, other_axis, softmax=True):
 
     Returns: weighted index for axis, BxC
 
-    """
+    r"""
     mat2line = torch.sum(x, axis=other_axis)
     # mat2line = mat2line / mat2line.mean() * 10
     if softmax:
@@ -208,7 +208,7 @@ def get_expected_points_from_map(hm, softmax=True):
     Returns:
         weighted index for axis, BxCx2. float between 0 and 1.
 
-    """
+    r"""
     # hm = 10*hm
     B, C, H, W = hm.shape
     y_mean = get_gaussian_mean(hm, 2, 3, softmax=softmax)  # B,C
@@ -305,13 +305,13 @@ def inverse_sigmoid(x, eps=1e-5):
 
 
 def get_raw_dict(args):
-    """
+    r"""
     return the dicf contained in args.
 
     e.g:
         >>> with open(path, 'w') as f:
                 json.dump(get_raw_dict(args), f, indent=2)
-    """
+    r"""
     if isinstance(args, argparse.Namespace):
         return vars(args)
     elif isinstance(args, dict):
@@ -369,7 +369,7 @@ class NiceRepr:
         ...        return 5
         >>> baz = Baz()
         >>> assert str(baz) == '<Baz(5)>'
-    """
+    r"""
 
     def __nice__(self):
         """str: a "nice" summary string describing this module"""
@@ -422,7 +422,7 @@ def ensure_rng(rng=None):
 
     References:
         .. [1] https://gitlab.kitware.com/computer-vision/kwarray/blob/master/kwarray/util_random.py#L270  # noqa: E501
-    """
+    r"""
 
     if rng is None:
         rng = np.random.mtrand._rand
@@ -451,7 +451,7 @@ def random_boxes(num=1, scale=1, rng=None):
         tensor([[280.9925, 278.9802, 308.6148, 366.1769],
                 [216.9113, 330.6978, 224.0446, 456.5878],
                 [405.3632, 196.3221, 493.3953, 270.7942]])
-    """
+    r"""
     rng = ensure_rng(rng)
 
     tlbr = rng.rand(num, 4).astype(np.float32)
@@ -596,9 +596,7 @@ def targets_to(targets: List[Dict[str, Any]], device):
     ]
 
 
-def get_phrases_from_posmap(
-    posmap: torch.BoolTensor, tokenized: Dict, tokenizer: AutoTokenizer
-):
+def get_phrases_from_posmap(posmap: torch.BoolTensor, tokenized: Dict, tokenizer: AutoTokenizer):
     assert isinstance(posmap, torch.Tensor), "posmap must be torch.Tensor"
     if posmap.dim() == 1:
         non_zero_idx = posmap.nonzero(as_tuple=True)[0].tolist()

@@ -30,25 +30,23 @@ Example:
     >>> print(results.scores)   # Confidence scores
 """
 
-from typing import List, Optional, Tuple, Union
 from dataclasses import dataclass
 from pathlib import Path
+from typing import List, Optional, Tuple, Union
 
 import numpy as np
 import torch
 from PIL import Image
 
+import groundeddino_vl.data.transforms as T
+
 # Import internal utilities
 from groundeddino_vl.models import build_model
-from groundeddino_vl.utils.slconfig import SLConfig
+from groundeddino_vl.utils.inference import annotate as _annotate_internal
+from groundeddino_vl.utils.inference import load_image as _load_image_internal
+from groundeddino_vl.utils.inference import predict as _predict_internal
 from groundeddino_vl.utils.misc import clean_state_dict
-from groundeddino_vl.utils.inference import (
-    preprocess_caption,
-    predict as _predict_internal,
-    load_image as _load_image_internal,
-    annotate as _annotate_internal,
-)
-import groundeddino_vl.data.transforms as T
+from groundeddino_vl.utils.slconfig import SLConfig
 
 
 @dataclass
@@ -63,6 +61,7 @@ class DetectionResult:
         scores: Confidence scores for each detection
         image_size: Original image size (height, width)
     """
+
     boxes: torch.Tensor
     labels: List[str]
     scores: torch.Tensor
@@ -93,14 +92,14 @@ class DetectionResult:
         return len(self.labels)
 
     def __repr__(self) -> str:
-        return (f"DetectionResult(detections={len(self)}, "
-                f"labels={self.labels[:3]}{'...' if len(self) > 3 else ''})")
+        return (
+            f"DetectionResult(detections={len(self)}, "
+            f"labels={self.labels[:3]}{'...' if len(self) > 3 else ''})"
+        )
 
 
 def load_model(
-    config_path: Union[str, Path],
-    checkpoint_path: Union[str, Path],
-    device: str = "cuda"
+    config_path: Union[str, Path], checkpoint_path: Union[str, Path], device: str = "cuda"
 ) -> torch.nn.Module:
     """
     Load a GroundedDINO-VL model from configuration and checkpoint.
@@ -183,9 +182,7 @@ def load_image(image_path: Union[str, Path]) -> Tuple[np.ndarray, torch.Tensor]:
 
 
 def preprocess_image(
-    image: Union[np.ndarray, Image.Image, torch.Tensor],
-    max_size: int = 1333,
-    size: int = 800
+    image: Union[np.ndarray, Image.Image, torch.Tensor], max_size: int = 1333, size: int = 800
 ) -> torch.Tensor:
     """
     Preprocess an image array/PIL image for model inference.
@@ -207,11 +204,13 @@ def preprocess_image(
         >>> image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         >>> tensor = preprocess_image(image_rgb)
     """
-    transform = T.Compose([
-        T.RandomResize([size], max_size=max_size),
-        T.ToTensor(),
-        T.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
-    ])
+    transform = T.Compose(
+        [
+            T.RandomResize([size], max_size=max_size),
+            T.ToTensor(),
+            T.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
+        ]
+    )
 
     # Convert to PIL if needed
     if isinstance(image, np.ndarray):
@@ -230,7 +229,7 @@ def predict(
     text_prompt: str,
     box_threshold: float = 0.35,
     text_threshold: float = 0.25,
-    device: str = "cuda"
+    device: str = "cuda",
 ) -> DetectionResult:
     """
     Perform object detection on an image using text prompts.
@@ -304,7 +303,7 @@ def predict(
         caption=text_prompt,
         box_threshold=box_threshold,
         text_threshold=text_threshold,
-        device=device
+        device=device,
     )
 
     # Get image size if available
@@ -313,19 +312,14 @@ def predict(
         image_size = (image_np.shape[0], image_np.shape[1])  # (H, W)
 
     # Return structured result
-    return DetectionResult(
-        boxes=boxes,
-        labels=phrases,
-        scores=logits,
-        image_size=image_size
-    )
+    return DetectionResult(boxes=boxes, labels=phrases, scores=logits, image_size=image_size)
 
 
 def annotate(
     image: np.ndarray,
     result: DetectionResult,
     show_labels: bool = True,
-    show_confidence: bool = True
+    show_confidence: bool = True,
 ) -> np.ndarray:
     """
     Annotate an image with detection results.
@@ -355,10 +349,7 @@ def annotate(
         Returns image in BGR format (not RGB) for OpenCV compatibility
     """
     return _annotate_internal(
-        image_source=image,
-        boxes=result.boxes,
-        logits=result.scores,
-        phrases=result.labels
+        image_source=image, boxes=result.boxes, logits=result.scores, phrases=result.labels
     )
 
 
@@ -370,7 +361,6 @@ __all__ = [
     "load_image",
     "preprocess_image",
     "annotate",
-
     # Data structures
     "DetectionResult",
 ]

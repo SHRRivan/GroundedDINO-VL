@@ -1,4 +1,4 @@
-from typing import Tuple, List
+from typing import List, Tuple
 
 import cv2
 import numpy as np
@@ -50,12 +50,12 @@ def load_image(image_path: str) -> Tuple[np.array, torch.Tensor]:
 
 
 def predict(
-        model,
-        image: torch.Tensor,
-        caption: str,
-        box_threshold: float,
-        text_threshold: float,
-        device: str = "cuda"
+    model,
+    image: torch.Tensor,
+    caption: str,
+    box_threshold: float,
+    text_threshold: float,
+    device: str = "cuda",
 ) -> Tuple[torch.Tensor, torch.Tensor, List[str]]:
     caption = preprocess_caption(caption=caption)
 
@@ -65,7 +65,9 @@ def predict(
     with torch.no_grad():
         outputs = model(image[None], captions=[caption])
 
-    prediction_logits = outputs["pred_logits"].cpu().sigmoid()[0]  # prediction_logits.shape = (nq, 256)
+    prediction_logits = (
+        outputs["pred_logits"].cpu().sigmoid()[0]
+    )  # prediction_logits.shape = (nq, 256)
     prediction_boxes = outputs["pred_boxes"].cpu()[0]  # prediction_boxes.shape = (nq, 4)
 
     mask = prediction_logits.max(dim=1)[0] > box_threshold
@@ -76,29 +78,28 @@ def predict(
     tokenized = tokenizer(caption)
 
     phrases = [
-        get_phrases_from_posmap(logit > text_threshold, tokenized, tokenizer).replace('.', '')
-        for logit
-        in logits
+        get_phrases_from_posmap(logit > text_threshold, tokenized, tokenizer).replace(".", "")
+        for logit in logits
     ]
 
     return boxes, logits.max(dim=1)[0], phrases
 
 
-def annotate(image_source: np.ndarray, boxes: torch.Tensor, logits: torch.Tensor, phrases: List[str]) -> np.ndarray:
+def annotate(
+    image_source: np.ndarray, boxes: torch.Tensor, logits: torch.Tensor, phrases: List[str]
+) -> np.ndarray:
     h, w, _ = image_source.shape
     boxes = boxes * torch.Tensor([w, h, w, h])
     xyxy = box_convert(boxes=boxes, in_fmt="cxcywh", out_fmt="xyxy").numpy()
     detections = sv.Detections(xyxy=xyxy)
 
-    labels = [
-        f"{phrase} {logit:.2f}"
-        for phrase, logit
-        in zip(phrases, logits)
-    ]
+    labels = [f"{phrase} {logit:.2f}" for phrase, logit in zip(phrases, logits)]
 
     box_annotator = sv.BoxAnnotator()
     annotated_frame = cv2.cvtColor(image_source, cv2.COLOR_RGB2BGR)
-    annotated_frame = box_annotator.annotate(scene=annotated_frame, detections=detections, labels=labels)
+    annotated_frame = box_annotator.annotate(
+        scene=annotated_frame, detections=detections, labels=labels
+    )
     return annotated_frame
 
 
@@ -109,16 +110,11 @@ def annotate(image_source: np.ndarray, boxes: torch.Tensor, logits: torch.Tensor
 
 class Model:
 
-    def __init__(
-        self,
-        model_config_path: str,
-        model_checkpoint_path: str,
-        device: str = "cuda"
-    ):
+    def __init__(self, model_config_path: str, model_checkpoint_path: str, device: str = "cuda"):
         self.model = load_model(
             model_config_path=model_config_path,
             model_checkpoint_path=model_checkpoint_path,
-            device=device
+            device=device,
         ).to(device)
         self.device = device
 
@@ -127,7 +123,7 @@ class Model:
         image: np.ndarray,
         caption: str,
         box_threshold: float = 0.35,
-        text_threshold: float = 0.25
+        text_threshold: float = 0.25,
     ) -> Tuple[sv.Detections, List[str]]:
         """
         import cv2
@@ -153,21 +149,16 @@ class Model:
             image=processed_image,
             caption=caption,
             box_threshold=box_threshold,
-            text_threshold=text_threshold)
+            text_threshold=text_threshold,
+        )
         source_h, source_w, _ = image.shape
         detections = Model.post_process_result(
-            source_h=source_h,
-            source_w=source_w,
-            boxes=boxes,
-            logits=logits)
+            source_h=source_h, source_w=source_w, boxes=boxes, logits=logits
+        )
         return detections, phrases
 
     def predict_with_classes(
-        self,
-        image: np.ndarray,
-        classes: List[str],
-        box_threshold: float,
-        text_threshold: float
+        self, image: np.ndarray, classes: List[str], box_threshold: float, text_threshold: float
     ) -> sv.Detections:
         """
         import cv2
@@ -195,13 +186,12 @@ class Model:
             image=processed_image,
             caption=caption,
             box_threshold=box_threshold,
-            text_threshold=text_threshold)
+            text_threshold=text_threshold,
+        )
         source_h, source_w, _ = image.shape
         detections = Model.post_process_result(
-            source_h=source_h,
-            source_w=source_w,
-            boxes=boxes,
-            logits=logits)
+            source_h=source_h, source_w=source_w, boxes=boxes, logits=logits
+        )
         class_id = Model.phrases2classes(phrases=phrases, classes=classes)
         detections.class_id = class_id
         return detections
@@ -221,10 +211,7 @@ class Model:
 
     @staticmethod
     def post_process_result(
-            source_h: int,
-            source_w: int,
-            boxes: torch.Tensor,
-            logits: torch.Tensor
+        source_h: int, source_w: int, boxes: torch.Tensor, logits: torch.Tensor
     ) -> sv.Detections:
         boxes = boxes * torch.Tensor([source_w, source_h, source_w, source_h])
         xyxy = box_convert(boxes=boxes, in_fmt="cxcywh", out_fmt="xyxy").numpy()

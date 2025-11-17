@@ -44,15 +44,13 @@ __version__ = "2025.11.0"
 __author__ = "ghostcipher1"
 
 # Import and re-export the public API
-from groundeddino_vl.api import (
-    # Core functions
+from groundeddino_vl.api import (  # Core functions; Data structures
+    DetectionResult,
+    annotate,
+    load_image,
     load_model,
     predict,
-    load_image,
     preprocess_image,
-    annotate,
-    # Data structures
-    DetectionResult,
 )
 
 # Public API exports
@@ -60,14 +58,12 @@ __all__ = [
     # Metadata
     "__version__",
     "__author__",
-
     # Core API functions
     "load_model",
     "predict",
     "load_image",
     "preprocess_image",
     "annotate",
-
     # Data structures
     "DetectionResult",
 ]

@@ -33,7 +33,7 @@ if __torchvision_need_compat_flag:
 class SmoothedValue(object):
     """Track a series of values and provide access to smoothed values over a
     window or the global series average.
-    """
+    r"""
 
     def __init__(self, window_size=20, fmt=None):
         if fmt is None:
@@ -101,10 +101,10 @@ class SmoothedValue(object):
 
 @functools.lru_cache()
 def _get_global_gloo_group():
-    """
+    r"""
     Return a process group based on gloo backend, containing all the ranks
     The result is cached.
-    """
+    r"""
 
     if dist.get_backend() == "nccl":
         return dist.new_group(backend="gloo")
@@ -113,13 +113,13 @@ def _get_global_gloo_group():
 
 
 def all_gather_cpu(data):
-    """
+    r"""
     Run all_gather on arbitrary picklable data (not necessarily tensors)
     Args:
         data: any picklable object
     Returns:
         list[data]: list of data gathered from each rank
-    """
+    r"""
 
     world_size = get_world_size()
     if world_size == 1:
@@ -171,13 +171,13 @@ def all_gather_cpu(data):
 
 
 def all_gather(data):
-    """
+    r"""
     Run all_gather on arbitrary picklable data (not necessarily tensors)
     Args:
         data: any picklable object
     Returns:
         list[data]: list of data gathered from each rank
-    """
+    r"""
 
     if os.getenv("CPU_REDUCE") == "1":
         return all_gather_cpu(data)
@@ -218,14 +218,14 @@ def all_gather(data):
 
 
 def reduce_dict(input_dict, average=True):
-    """
+    r"""
     Args:
         input_dict (dict): all the values will be reduced
         average (bool): whether to do average or sum
     Reduce the values in the dictionary from all processes so that all processes
     have the averaged results. Returns a dict with the same fields as
     input_dict, after reduction.
-    """
+    r"""
     world_size = get_world_size()
     if world_size < 2:
         return input_dict
@@ -530,9 +530,9 @@ def _onnx_nested_tensor_from_tensor_list(tensor_list: List[Tensor]) -> NestedTen
 
 
 def setup_for_distributed(is_master):
-    """
+    r"""
     This function disables printing when not in master process
-    """
+    r"""
     import builtins as __builtin__
 
     builtin_print = __builtin__.print
@@ -660,7 +660,7 @@ def accuracy_onehot(pred, gt):
     Args:
         pred (_type_): n, c
         gt (_type_): n, c
-    """
+    r"""
     tp = ((pred - gt).abs().sum(-1) < 1e-4).float().sum()
     acc = tp / gt.shape[0] * 100
     return acc
@@ -668,11 +668,11 @@ def accuracy_onehot(pred, gt):
 
 def interpolate(input, size=None, scale_factor=None, mode="nearest", align_corners=None):
     # type: (Tensor, Optional[List[int]], Optional[float], str, Optional[bool]) -> Tensor
-    """
+    r"""
     Equivalent to nn.functional.interpolate, but with support for empty batch sizes.
     This will eventually be supported natively by PyTorch, and this
     class can go away.
-    """
+    r"""
     if __torchvision_need_compat_flag < 0.7:
         if input.numel() > 0:
             return torch.nn.functional.interpolate(input, size, scale_factor, mode, align_corners)

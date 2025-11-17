@@ -148,3 +148,4 @@ docs/TESTING_C_EXTENSION.md
 
 # Demo outputs
 demo/outputs/
+.venv/

@@ -26,11 +26,9 @@ def test_import_groundeddino_vl():
 
 def test_import_groundingdino():
     """Test that groundingdino can be imported (legacy compatibility)."""
-    import groundingdino
 
     # Verify core modules can be imported
-    from groundingdino import models
-    from groundingdino import util
+    from groundingdino import models, util
 
     assert models is not None, "models module not found"
     assert util is not None, "util module not found"
@@ -38,8 +36,8 @@ def test_import_groundingdino():
 
 def test_groundingdino_references_groundeddino_vl():
     """Test that groundingdino properly re-exports from groundeddino_vl."""
-    import groundingdino
     import groundeddino_vl
+    import groundingdino
 
     # Both should have the same version
     assert groundingdino.__version__ == groundeddino_vl.__version__
@@ -49,14 +47,15 @@ def test_groundingdino_references_groundeddino_vl():
 
     # Both should have util and utils available (may be separate module instances
     # for the legacy compatibility shim)
-    assert hasattr(groundingdino, 'util'), "groundingdino missing util"
-    assert hasattr(groundeddino_vl, 'utils'), "groundeddino_vl missing utils"
+    assert hasattr(groundingdino, "util"), "groundingdino missing util"
+    assert hasattr(groundeddino_vl, "utils"), "groundeddino_vl missing utils"
 
 
 def test_cuda_extension_loadable():
     """Test that the CUDA extension can be loaded."""
     try:
         import groundingdino._C as cuda_ext
+
         # If we get here, the extension loaded successfully
         assert cuda_ext is not None
     except ImportError as e:

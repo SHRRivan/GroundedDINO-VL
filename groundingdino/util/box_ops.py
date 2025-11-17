@@ -37,14 +37,14 @@ def box_iou(boxes1, boxes2):
 
 
 def generalized_box_iou(boxes1, boxes2):
-    """
+    r"""
     Generalized IoU from https://giou.stanford.edu/
 
     The boxes should be in [x0, y0, x1, y1] format
 
     Returns a [N, M] pairwise matrix, where N = len(boxes1)
     and M = len(boxes2)
-    """
+    r"""
     # degenerate boxes gives inf / nan results
     # so do an early check
     assert (boxes1[:, 2:] >= boxes1[:, :2]).all()
@@ -80,14 +80,14 @@ def box_iou_pairwise(boxes1, boxes2):
 
 
 def generalized_box_iou_pairwise(boxes1, boxes2):
-    """
+    r"""
     Generalized IoU from https://giou.stanford.edu/
 
     Input:
         - boxes1, boxes2: N,4
     Output:
         - giou: N, 4
-    """
+    r"""
     # degenerate boxes gives inf / nan results
     # so do an early check
     assert (boxes1[:, 2:] >= boxes1[:, :2]).all()
@@ -110,7 +110,7 @@ def masks_to_boxes(masks):
     The masks should be in format [N, H, W] where N is the number of masks, (H, W) are the spatial dimensions.
 
     Returns a [N, 4] tensors, with the boxes in xyxy format
-    """
+    r"""
     if masks.numel() == 0:
         return torch.zeros((0, 4), device=masks.device)
 

@@ -9,9 +9,10 @@
 # Try to import CUDA extension
 try:
     from groundeddino_vl import _C
+
     __cuda_available__ = True
 except ImportError:
     _C = None
     __cuda_available__ = False
 
-__all__ = ['_C', '__cuda_available__']
+__all__ = ["_C", "__cuda_available__"]

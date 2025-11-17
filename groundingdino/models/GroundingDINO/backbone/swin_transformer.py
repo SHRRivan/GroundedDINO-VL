@@ -45,13 +45,13 @@ class Mlp(nn.Module):
 
 
 def window_partition(x, window_size):
-    """
+    r"""
     Args:
         x: (B, H, W, C)
         window_size (int): window size
     Returns:
         windows: (num_windows*B, window_size, window_size, C)
-    """
+    r"""
     B, H, W, C = x.shape
     x = x.view(B, H // window_size, window_size, W // window_size, window_size, C)
     windows = x.permute(0, 1, 3, 2, 4, 5).contiguous().view(-1, window_size, window_size, C)
@@ -59,7 +59,7 @@ def window_partition(x, window_size):
 
 
 def window_reverse(windows, window_size, H, W):
-    """
+    r"""
     Args:
         windows: (num_windows*B, window_size, window_size, C)
         window_size (int): Window size
@@ -67,7 +67,7 @@ def window_reverse(windows, window_size, H, W):
         W (int): Width of image
     Returns:
         x: (B, H, W, C)
-    """
+    r"""
     B = int(windows.shape[0] / (H * W / window_size / window_size))
     x = windows.view(B, H // window_size, W // window_size, window_size, window_size, -1)
     x = x.permute(0, 1, 3, 2, 4, 5).contiguous().view(B, H, W, -1)
@@ -85,7 +85,7 @@ class WindowAttention(nn.Module):
         qk_scale (float | None, optional): Override default qk scale of head_dim ** -0.5 if set
         attn_drop (float, optional): Dropout ratio of attention weight. Default: 0.0
         proj_drop (float, optional): Dropout ratio of output. Default: 0.0
-    """
+    r"""
 
     def __init__(
         self,
@@ -189,7 +189,7 @@ class SwinTransformerBlock(nn.Module):
         drop_path (float, optional): Stochastic depth rate. Default: 0.0
         act_layer (nn.Module, optional): Activation layer. Default: nn.GELU
         norm_layer (nn.Module, optional): Normalization layer.  Default: nn.LayerNorm
-    """
+    r"""
 
     def __init__(
         self,
@@ -303,7 +303,7 @@ class PatchMerging(nn.Module):
     Args:
         dim (int): Number of input channels.
         norm_layer (nn.Module, optional): Normalization layer.  Default: nn.LayerNorm
-    """
+    r"""
 
     def __init__(self, dim, norm_layer=nn.LayerNorm):
         super().__init__()
@@ -356,7 +356,7 @@ class BasicLayer(nn.Module):
         norm_layer (nn.Module, optional): Normalization layer. Default: nn.LayerNorm
         downsample (nn.Module | None, optional): Downsample layer at the end of the layer. Default: None
         use_checkpoint (bool): Whether to use checkpointing to save memory. Default: False.
-    """
+    r"""
 
     def __init__(
         self,
@@ -463,7 +463,7 @@ class PatchEmbed(nn.Module):
         in_chans (int): Number of input image channels. Default: 3.
         embed_dim (int): Number of linear projection output channels. Default: 96.
         norm_layer (nn.Module, optional): Normalization layer. Default: None
-    """
+    r"""
 
     def __init__(self, patch_size=4, in_chans=3, embed_dim=96, norm_layer=None):
         super().__init__()
@@ -525,7 +525,7 @@ class SwinTransformer(nn.Module):
             -1 means not freezing any parameters.
         use_checkpoint (bool): Whether to use checkpointing to save memory. Default: False.
         dilation (bool): if True, the output size if 16x downsample, ow 32x downsample.
-    """
+    r"""
 
     def __init__(
         self,

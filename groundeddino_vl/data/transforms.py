@@ -245,10 +245,10 @@ class RandomPad(object):
 
 
 class RandomSelect(object):
-    """
+    r"""
     Randomly selects between transforms1 and transforms2,
     with probability p for transforms1 and (1 - p) for transforms2
-    """
+    r"""
 
     def __init__(self, transforms1, transforms2, p=0.5):
         self.transforms1 = transforms1

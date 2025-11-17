@@ -24,20 +24,20 @@ import torchvision
 from torch import nn
 from torchvision.models._utils import IntermediateLayerGetter
 
-from groundeddino_vl.utils.misc import NestedTensor, clean_state_dict, is_main_process
+from groundeddino_vl.utils.misc import NestedTensor, is_main_process
 
 from .position_encoding import build_position_encoding
 from .swin_transformer import build_swin_transformer
 
 
 class FrozenBatchNorm2d(torch.nn.Module):
-    """
+    r"""
     BatchNorm2d where the batch statistics and the affine parameters are fixed.
 
     Copy-paste from torchvision.misc.ops with added eps before rqsrt,
     without which any other models than torchvision.models.resnet[18,34,50,101]
     produce nans.
-    """
+    r"""
 
     def __init__(self, n):
         super(FrozenBatchNorm2d, self).__init__()
@@ -160,7 +160,7 @@ class Joiner(nn.Sequential):
 
 
 def build_backbone(args):
-    """
+    r"""
     Useful args:
         - backbone: backbone name
         - lr_backbone:
@@ -169,7 +169,7 @@ def build_backbone(args):
         - backbone_freeze_keywords:
         - use_checkpoint: for swin only for now
 
-    """
+    r"""
     position_embedding = build_position_encoding(args)
     train_backbone = True
     if not train_backbone:

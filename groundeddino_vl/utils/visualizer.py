@@ -2,14 +2,13 @@
 """
 @File    :   visualizer.py
 @Time    :   2022/04/05 11:39:33
-@Author  :   Shilong Liu 
+@Author  :   Shilong Liu
 @Contact :   slongliu86@gmail.com
 """
 
 import datetime
 import os
 
-import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
@@ -64,14 +63,14 @@ class ColorMap:
 
 
 def rainbow_text(x, y, ls, lc, **kw):
-    """
+    r"""
     Take a list of strings ``ls`` and colors ``lc`` and place them next to each
     other, with text ls[i] being shown in color lc[i].
 
     This example shows how to do both vertical and horizontal text, and will
     pass all keyword arguments to plt.text, so you can set the font size,
     family, etc.
-    """
+    r"""
     t = plt.gca().transData
     fig = plt.gcf()
     plt.show()
