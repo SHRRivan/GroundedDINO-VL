@@ -21,7 +21,6 @@ import numpy as np
 
 from . import model_loader
 from .config import DEFAULT_SETTINGS
-from .utils import convert_to_labelstudio_format
 
 
 def _decode_image_bytes(image_bytes: bytes) -> np.ndarray:
