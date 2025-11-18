@@ -250,8 +250,7 @@ def main() -> None:
         type=str,
         default=os.environ.get("GDVL_CHECKPOINT"),
         help="Path to model checkpoint (.pth)",
-    )
-    
+    )    
     args = parser.parse_args()
 
     # Make accessible globally inside create_app()
