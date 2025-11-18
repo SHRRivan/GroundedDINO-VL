@@ -149,7 +149,9 @@ def create_app() -> Any:
             try:
                 # server.py is at groundeddino_vl/ls_backend/server.py
                 # repo root is two levels up from here
-                project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+                project_root = os.path.abspath(
+                    os.path.join(os.path.dirname(__file__), "..", "..")
+                )
                 default_config = os.environ.get(
                     "MODEL_CONFIG_PATH",
                     os.path.join(
@@ -162,7 +164,9 @@ def create_app() -> Any:
                 )
                 default_ckpt = os.environ.get(
                     "MODEL_CHECKPOINT_PATH",
-                    os.path.join(project_root, "checkpoints", "groundingdino_swint_ogc.pth"),
+                    os.path.join(
+                        project_root, "checkpoints", "groundingdino_swint_ogc.pth"
+                    ),
                 )
                 if os.path.isfile(default_config) and os.path.isfile(default_ckpt):
                     model_loaded = True
@@ -191,15 +195,21 @@ def create_app() -> Any:
         for t in tasks:
             img_ref = _maybe_extract_image_ref(t)
             if img_ref is None:
-                raise HTTPException(status_code=400, detail="No image reference found in task")
+                raise HTTPException(
+                    status_code=400, detail="No image reference found in task"
+                )
             try:
                 image_bytes = _to_image_bytes(img_ref)
             except Exception as e:
-                raise HTTPException(status_code=400, detail=f"Failed to obtain image bytes: {e}")
+                raise HTTPException(
+                    status_code=400, detail=f"Failed to obtain image bytes: {e}"
+                )
 
             prompt = _extract_prompt(t)
             try:
-                result = inference_engine.run_inference(image_bytes=image_bytes, prompt_text=prompt)
+                result = inference_engine.run_inference(
+                    image_bytes=image_bytes, prompt_text=prompt
+                )
             except Exception as e:
                 raise HTTPException(status_code=500, detail=f"Inference failed: {e}")
 
@@ -229,12 +239,16 @@ def main() -> None:
 
     parser = argparse.ArgumentParser(description="GroundedDINO-VL LS Backend Server")
     parser.add_argument(
-        "--host", default=os.environ.get("HOST", "0.0.0.0"), help="Host interface to bind"
+        "--host",
+        default=os.environ.get("HOST", "0.0.0.0"),
+        help="Host interface to bind",
     )
     parser.add_argument(
         "--port",
         type=int,
-        default=int(os.environ.get("PORT", str(getattr(DEFAULT_SETTINGS, "server_port", 9090)))),
+        default=int(
+            os.environ.get("PORT", str(getattr(DEFAULT_SETTINGS, "server_port", 9090)))
+        ),
         help="TCP port to listen on",
     )
 
@@ -250,7 +264,7 @@ def main() -> None:
         type=str,
         default=os.environ.get("GDVL_CHECKPOINT"),
         help="Path to model checkpoint (.pth)",
-    )    
+    )
     args = parser.parse_args()
 
     # Make accessible globally inside create_app()
