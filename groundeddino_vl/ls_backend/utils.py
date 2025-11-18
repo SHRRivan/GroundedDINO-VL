@@ -6,13 +6,15 @@ and other utilities used by the LS backend.
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Tuple, Union, Optional
+from typing import Any, Dict, List, Optional, Tuple, Union
 
-import numpy as np
 import base64
+import logging
 import os
 from io import BytesIO
-import logging
+from urllib.request import Request, urlopen
+
+import numpy as np
 import requests
 
 try:  # optional, used for size detection
@@ -25,7 +27,7 @@ try:  # optional fallback for size detection
 except Exception:  # pragma: no cover
     cv2 = None  # type: ignore
 
-from urllib.request import urlopen, Request
+# (no additional imports below; keep groups separated by blank lines)
 
 # Module logger for ls_backend utilities
 logger = logging.getLogger(__name__)

@@ -13,18 +13,18 @@ Notes:
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Union
 import argparse
 import base64
 import os
-from urllib.request import urlopen, Request
+from typing import Any, Dict, List, Union
+from urllib.request import Request, urlopen
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-from .config import DEFAULT_SETTINGS
-from . import model_loader
 from . import inference_engine
+from . import model_loader
+from .config import DEFAULT_SETTINGS
 
 
 def _read_bytes_from_url(url: str, timeout: int = 20) -> bytes:

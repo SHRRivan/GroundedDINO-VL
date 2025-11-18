@@ -13,9 +13,9 @@ integration with a Label Studio ML Backend service.
 
 from __future__ import annotations
 
-from typing import Any, Dict, Optional, List, Tuple, Union
 from io import BytesIO
 import time
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
