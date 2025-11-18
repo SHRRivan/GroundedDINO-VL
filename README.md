@@ -63,6 +63,7 @@ pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
 pip install -e .
 ```
 
+
 ### Verify Installation
 
 ```bash
@@ -72,6 +73,37 @@ python -c "import groundeddino_vl; print(f'GroundedDINO-VL {groundeddino_vl.__ve
 ### Building from Source (Advanced)
 
 For detailed build instructions, including troubleshooting and custom compiler flags, see [BUILD_GUIDE.md](BUILD_GUIDE.md).
+
+<img alt="LabelStudio logo" src="https://user-images.githubusercontent.com/12534576/192582340-4c9e4401-1fe6-4dbb-95bb-fdbba5493f61.png" />
+
+## Label Studio ML Backend (GroundedDINO-VL v2.0.0)
+
+GroundedDINO-VL v2.0.0 introduces an optional Label Studio ML Backend (`ls_backend`) that allows GroundedDINO-VL to act as a real-time auto-annotation service inside Label Studio.
+
+This backend runs as a standalone FastAPI service (default port 9090) and provides:
+- On-demand inference
+- Auto-labeling ("magic wand")
+- Batch annotation assistance
+- Optional PostgreSQL/SQLite history logging
+
+### Documentation
+
+To keep this README focused, full documentation has been moved into dedicated files:
+
+- **Overview**  
+  [docs/ls_backend/overview.md](docs/ls_backend/overview.md)
+
+- **Installation & Environment Setup**  
+  [docs/ls_backend/installation.md](docs/ls_backend/installation.md)
+
+- **Using GroundedDINO-VL with Label Studio**  
+  [docs/ls_backend/using_with_labelstudio.md](docs/ls_backend/using_with_labelstudio.md)
+
+- **Database Support (PostgreSQL or SQLite)**  
+  [docs/ls_backend/database.md](docs/ls_backend/database.md)
+
+- **Troubleshooting**  
+  [docs/ls_backend/troubleshooting.md](docs/ls_backend/troubleshooting.md)
 
 ---
 
@@ -228,12 +260,9 @@ This project is based on the groundbreaking work:
 
 ### Version Format
 
-GroundedDINO-VL uses **year-based versioning**:
+GroundedDINO-VL uses semantic versioning:
 
-- Format: `YYYY.MAJOR.MINOR` (e.g., `2025.11.0`)
-- **2025**: Release year
-- **11**: Major version within the year
-- **0**: Minor version/patch
+- Example: `v2.0.0`
 
 ### Setup Development Environment
 

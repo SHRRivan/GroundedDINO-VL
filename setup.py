@@ -58,7 +58,7 @@ except ImportError:
     CUDAExtension = None
 
 # GroundedDINO-VL version info
-version = "2025.11.0"
+version = "v2.0.0"
 package_name = "groundeddino-vl"
 cwd = os.path.dirname(os.path.abspath(__file__))
 
@@ -91,7 +91,7 @@ def check_cuda_toolkit():
     """Check if NVIDIA CUDA Toolkit is installed and accessible."""
     # Check CUDA_HOME environment variable
     cuda_home = os.environ.get("CUDA_HOME") or os.environ.get("CUDA_PATH")
-    
+
     # Check if nvcc is in PATH
     nvcc_found = False
     nvcc_version = None
@@ -111,12 +111,12 @@ def check_cuda_toolkit():
                     break
     except (FileNotFoundError, subprocess.TimeoutExpired):
         pass
-    
+
     # Check common CUDA installation paths
     cuda_paths = []
     if cuda_home:
         cuda_paths.append(cuda_home)
-    
+
     if platform.system() == "Windows":
         default_paths = [
             r"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA",
@@ -129,11 +129,11 @@ def check_cuda_toolkit():
             "/usr/local/cuda-12.6",
             "/opt/cuda",
         ]
-    
+
     for path in default_paths:
         if os.path.exists(path) and os.path.isdir(path):
             cuda_paths.append(path)
-    
+
     return {
         "found": nvcc_found or len(cuda_paths) > 0,
         "nvcc_available": nvcc_found,
@@ -148,7 +148,7 @@ def check_cpp17_compiler():
     is_windows = platform.system() == "Windows"
     compiler_found = False
     compiler_info = None
-    
+
     if is_windows:
         # Check for MSVC (Visual Studio)
         try:
@@ -164,7 +164,7 @@ def check_cpp17_compiler():
                 compiler_info = "MSVC (Visual Studio)"
         except (FileNotFoundError, subprocess.TimeoutExpired):
             pass
-        
+
         # Also check for clang-cl
         try:
             result = subprocess.run(
@@ -201,7 +201,7 @@ def check_cpp17_compiler():
                     compiler_info = "GCC (version unknown)"
         except (FileNotFoundError, subprocess.TimeoutExpired):
             pass
-        
+
         # Check for Clang
         try:
             result = subprocess.run(
@@ -229,7 +229,7 @@ def check_cpp17_compiler():
                     compiler_info = "Clang (version unknown)"
         except (FileNotFoundError, subprocess.TimeoutExpired):
             pass
-    
+
     return {
         "found": compiler_found,
         "info": compiler_info,
@@ -244,10 +244,10 @@ def prompt_user(prompt_text, default="yes"):
         # Default to 'yes' to allow installation to proceed
         print(f"\nNon-interactive environment detected. Defaulting to 'yes'.")
         return True
-    
+
     valid_responses = {"yes": True, "y": True, "no": False, "n": False}
     default_response = default.lower()
-    
+
     while True:
         try:
             response = input(f"{prompt_text} [yes/no] (default: {default}): ").strip().lower()
@@ -272,17 +272,17 @@ def check_prerequisites():
         return  # Skip during build - prerequisites checked during installation
     if os.environ.get("PEP517_BUILD_BACKEND") or os.environ.get("BUILDING_WHEEL"):
         return  # Skip during build
-    
+
     # Use ASCII-safe characters for Windows compatibility
     print("\n" + "="*70)
     print("Checking prerequisites for GroundedDINO-VL installation...")
     print("="*70)
-    
+
     cuda_check = check_cuda_toolkit()
     compiler_check = check_cpp17_compiler()
-    
+
     missing_items = []
-    
+
     # Check CUDA Toolkit
     if not cuda_check["found"]:
         missing_items.append("NVIDIA CUDA Toolkit")
@@ -299,7 +299,7 @@ def check_prerequisites():
             print(f"   - CUDA_HOME: {cuda_check['cuda_home']}")
         if cuda_check["cuda_paths"]:
             print(f"   - CUDA paths found: {', '.join(cuda_check['cuda_paths'])}")
-    
+
     # Check C++17 Compiler
     if not compiler_check["found"]:
         missing_items.append("C++17 compatible compiler")
@@ -308,15 +308,15 @@ def check_prerequisites():
     else:
         print(f"\n[OK] C++17 Compatible Compiler FOUND")
         print(f"   - Compiler: {compiler_check['info']}")
-    
+
     print("="*70)
-    
+
     if missing_items:
         print("\n[WARNING] MISSING PREREQUISITES DETECTED")
         print(f"\nThe following required components are missing:")
         for item in missing_items:
             print(f"  - {item}")
-        
+
         print("\nInstallation instructions:")
         if "NVIDIA CUDA Toolkit" in missing_items:
             print("\n  For CUDA Toolkit:")
@@ -325,7 +325,7 @@ def check_prerequisites():
             print("  - Set CUDA_HOME environment variable")
             print("  - Add CUDA bin directory to PATH")
             print("  - Verify: nvcc --version")
-        
+
         if "C++17 compatible compiler" in missing_items:
             print("\n  For C++17 Compiler:")
             is_windows = platform.system() == "Windows"
@@ -335,16 +335,16 @@ def check_prerequisites():
             else:
                 print("  - Linux: sudo apt-get install build-essential (GCC 7+)")
                 print("  - macOS: xcode-select --install (Clang 5+)")
-        
+
         print("\n" + "="*70)
-        
+
         # Prompt user
         proceed = prompt_user(
             "\nDo you want to proceed with installation anyway? "
             "(This will likely fail or result in 'NameError: name '_C' is not defined' errors)",
             default="yes"
         )
-        
+
         if not proceed:
             print("\n" + "="*70)
             print("Installation cancelled.")
@@ -368,7 +368,7 @@ def get_extensions():
     if not _PREREQUISITES_CHECKED:
         check_prerequisites()
         _PREREQUISITES_CHECKED = True
-    
+
     # If torch is not available, skip building extensions
     # Extensions will be built when torch is installed
     if not TORCH_AVAILABLE:
@@ -402,7 +402,7 @@ def get_extensions():
     else:
         # Unix-like (Linux, macOS): -std=c++17
         cxx_flags = ["-std=c++17"]
-    
+
     extra_compile_args = {"cxx": cxx_flags}
     define_macros = []
 
@@ -417,7 +417,7 @@ def get_extensions():
         extension = CUDAExtension
         sources += source_cuda
         define_macros += [("WITH_CUDA", None)]
-        
+
         # CUDA compiler (nvcc) flags - C++17 is required for CUDA compilation
         # Note: nvcc uses -std=c++17 regardless of platform
         nvcc_flags = [
@@ -427,7 +427,7 @@ def get_extensions():
             "-D__CUDA_NO_HALF_CONVERSIONS__",
             "-D__CUDA_NO_HALF2_OPERATORS__",
         ]
-        
+
         # Add host compiler C++17 flag for nvcc to pass to host compiler
         # This ensures the host compiler (gcc/clang/msvc) also uses C++17
         if not is_windows:
@@ -435,7 +435,7 @@ def get_extensions():
             # On Windows with MSVC, PyTorch's BuildExtension handles this automatically
             # through the cxx flags we set above
             nvcc_flags.append("-Xcompiler=-std=c++17")
-        
+
         extra_compile_args["nvcc"] = nvcc_flags
     else:
         print("\n" + "="*70)

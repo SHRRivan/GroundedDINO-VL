@@ -40,18 +40,43 @@ Public API:
         - ops: CUDA operations (if available, for advanced users)
 """
 
-__version__ = "2025.11.0"
+__version__ = "v2.0.0"
 __author__ = "ghostcipher1"
 
-# Import and re-export the public API
-from groundeddino_vl.api import (  # Core functions; Data structures
-    DetectionResult,
-    annotate,
-    load_image,
-    load_model,
-    predict,
-    preprocess_image,
-)
+# Import and re-export the public API.
+# NOTE: Avoid hard failures (and heavyweight imports like torch) during light-weight
+# environments such as minimal test runs that only need ls_backend modules.
+# We try to import the API, but if dependencies are missing we provide lazy stubs
+# that raise on use while still allowing `import groundeddino_vl` to succeed.
+try:  # pragma: no cover - exercised indirectly in environments with full deps
+    from groundeddino_vl.api import (
+        DetectionResult,
+        annotate,
+        load_image,
+        load_model,
+        predict,
+        preprocess_image,
+    )
+except Exception:  # pragma: no cover
+
+    class _MissingDependencyProxy:
+        def __init__(self, name: str):
+            self._name = name
+
+        def __call__(self, *args, **kwargs):
+            raise ImportError(
+                f"{self._name} is unavailable because optional heavy dependencies "
+                f"(e.g., torch) are not installed in this environment."
+            )
+
+    class DetectionResult:  # type: ignore
+        pass
+
+    annotate = _MissingDependencyProxy("annotate")  # type: ignore
+    load_image = _MissingDependencyProxy("load_image")  # type: ignore
+    load_model = _MissingDependencyProxy("load_model")  # type: ignore
+    predict = _MissingDependencyProxy("predict")  # type: ignore
+    preprocess_image = _MissingDependencyProxy("preprocess_image")  # type: ignore
 
 # Public API exports
 __all__ = [

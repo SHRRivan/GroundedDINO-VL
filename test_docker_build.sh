@@ -28,20 +28,20 @@ print_status() {
 
 # Step 1: Build main image
 echo -e "${YELLOW}Step 1: Building main Docker image...${NC}"
-docker build -t groundeddino_vl:2025.11.0 .
+docker build -t groundeddino_vl:v2.0.0 .
 print_status "Main image built successfully"
 echo ""
 
 # Step 2: Test basic imports
 echo -e "${YELLOW}Step 2: Testing basic imports...${NC}"
 
-docker run --rm groundeddino_vl:2025.11.0 python -c "import groundeddino_vl; print(f'groundeddino_vl version: {groundeddino_vl.__version__}')"
+docker run --rm groundeddino_vl:v2.0.0 python -c "import groundeddino_vl; print(f'groundeddino_vl version: {groundeddino_vl.__version__}')"
 print_status "groundeddino_vl import works"
 
-docker run --rm groundeddino_vl:2025.11.0 python -c "import groundingdino; print(f'groundingdino version: {groundingdino.__version__}')"
+docker run --rm groundeddino_vl:v2.0.0 python -c "import groundingdino; print(f'groundingdino version: {groundingdino.__version__}')"
 print_status "groundingdino backward compatibility works"
 
-docker run --rm groundeddino_vl:2025.11.0 python -c "import shadow_dino; print(f'shadow_dino version: {shadow_dino.__version__}')"
+docker run --rm groundeddino_vl:v2.0.0 python -c "import shadow_dino; print(f'shadow_dino version: {shadow_dino.__version__}')"
 print_status "shadow_dino wrapper works"
 echo ""
 
@@ -49,7 +49,7 @@ echo ""
 echo -e "${YELLOW}Step 3: Verifying CUDA extension (_C)...${NC}"
 
 # Check if _C module exists
-docker run --rm groundeddino_vl:2025.11.0 python -c "
+docker run --rm groundeddino_vl:v2.0.0 python -c "
 import groundeddino_vl
 if hasattr(groundeddino_vl, '_C'):
     print('✓ groundeddino_vl._C extension exists')
@@ -86,7 +86,7 @@ echo -e "${GREEN}✓ All verification checks passed!${NC}"
 echo -e "${BLUE}=========================================${NC}"
 echo ""
 echo "Summary:"
-echo "  • Main image: groundeddino_vl:2025.11.0"
+echo "  • Main image: groundeddino_vl:v2.0.0"
 echo "  • Test image: groundeddino_vl:test"
 echo "  • All imports working"
 echo "  • CUDA extension verified"

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "groundeddino-vl"
-version = "2025.11.0"
+version = "v2.0.0"
 description = "GroundedDINO-VL - Modern Vision-Language Foundation Models for PyTorch 2.7 + CUDA 12.8"
 readme = "README.md"
 license = { text = "Apache-2.0" }

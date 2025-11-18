@@ -41,13 +41,13 @@ echo ""
 
 # Check version files
 echo "3. Checking version files..."
-if grep -q "2025.11.0" groundeddino_vl/version.py; then
+if grep -q "v2.0.0" groundeddino_vl/version.py; then
     echo -e "${GREEN}✓${NC} groundeddino_vl/version.py is correct"
 else
     echo -e "${RED}✗${NC} groundeddino_vl/version.py version mismatch"
 fi
 
-if grep -q "2025.11.0" groundingdino/version.py; then
+if grep -q "v2.0.0" groundingdino/version.py; then
     echo -e "${GREEN}✓${NC} groundingdino/version.py is correct"
 else
     echo -e "${RED}✗${NC} groundingdino/version.py version mismatch"
@@ -67,7 +67,7 @@ echo ""
 echo "Ready to build Docker images!"
 echo ""
 echo "Next steps:"
-echo "  1. Build main image:  docker build -t groundeddino_vl:2025.11.0 ."
+echo "  1. Build main image:  docker build -t groundeddino_vl:v2.0.0 ."
 echo "  2. Build test image:  docker build -f Dockerfile.test -t groundeddino_vl:test ."
 echo "  3. Run tests:         docker run --rm groundeddino_vl:test"
 echo ""

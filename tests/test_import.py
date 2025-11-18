@@ -20,18 +20,23 @@ def test_import_groundingdino():
 def test_groundingdino_version():
     """Test that groundingdino has the correct version."""
     import groundingdino.version as version_module
+    import groundeddino_vl
 
+    # Ensure version attribute exists and matches the canonical package version
     assert hasattr(version_module, "__version__")
-    assert version_module.__version__ == "2025.11.0"
+    assert isinstance(version_module.__version__, str)
+    assert version_module.__version__ == groundeddino_vl.__version__
 
 
 def test_groundingdino_has_cuda_extension():
-    """Test that the _C CUDA extension exists (may not be loaded without GPU)."""
-    import groundingdino
+    """Test that the CUDA extension is importable when available.
 
-    # Check that the module has the _C attribute defined
-    # Note: This may fail to load if CUDA is not available, but the attribute should exist
-    assert hasattr(groundingdino, "_C") or True  # Relaxed check for environments without CUDA
+    In CPU-only environments or where the extension wasn't built, skip gracefully.
+    """
+    try:
+        import groundingdino._C as _  # noqa: F401
+    except ImportError as e:
+        pytest.skip(f"CUDA extension not available: {e}")
 
 
 def test_import_models():
