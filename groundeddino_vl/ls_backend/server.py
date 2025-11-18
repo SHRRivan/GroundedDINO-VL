@@ -212,10 +212,13 @@ def create_app() -> Any:
 
 
 def main() -> None:
-    """CLI entry point to start the server with uvicorn.
+    """CLI entry point to start the GroundedDINO-VL LS backend server.
 
-    Supports optional command-line overrides for host and port, e.g.:
-      python -m groundeddino_vl.ls_backend.server --host 0.0.0.0 --port 9090
+    Supports:
+      --host
+      --port
+      --config       Path to model config (.py)
+      --checkpoint   Path to model weights (.pth)
     """
     try:
         import uvicorn  # type: ignore
@@ -234,7 +237,28 @@ def main() -> None:
         default=int(os.environ.get("PORT", str(getattr(DEFAULT_SETTINGS, "server_port", 9090)))),
         help="TCP port to listen on",
     )
+
+    # NEW arguments for model loading
+    parser.add_argument(
+        "--config",
+        type=str,
+        default=os.environ.get("GDVL_CONFIG"),
+        help="Path to GroundedDINO-VL model config file (.py)",
+    )
+    parser.add_argument(
+        "--checkpoint",
+        type=str,
+        default=os.environ.get("GDVL_CHECKPOINT"),
+        help="Path to model checkpoint (.pth)",
+    )
+    
     args = parser.parse_args()
+
+    # Make accessible globally inside create_app()
+    if args.config:
+        os.environ["GDVL_CONFIG"] = args.config
+    if args.checkpoint:
+        os.environ["GDVL_CHECKPOINT"] = args.checkpoint
 
     uvicorn.run(
         "groundeddino_vl.ls_backend.server:create_app",
