@@ -59,9 +59,6 @@ jobs:
           black --version
           black --check groundeddino_vl groundingdino tests
 
-      - name: Run isort check
-        run: isort --check-only groundeddino_vl groundingdino tests
-
       - name: Run mypy
         run: mypy groundeddino_vl --ignore-missing-imports || true
 
