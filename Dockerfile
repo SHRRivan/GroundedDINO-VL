@@ -96,6 +96,6 @@ LABEL org.opencontainers.image.description="GroundedDINO-VL with PyTorch 2.7 + C
 LABEL org.opencontainers.image.licenses="Apache-2.0"
 LABEL org.opencontainers.image.vendor="ghostcipher1"
 LABEL org.opencontainers.image.title="GroundedDINO-VL"
-LABEL org.opencontainers.image.version="2025.11.0"
+LABEL org.opencontainers.image.version="v2.0.0"
 LABEL maintainer="ghostcipher1"
 

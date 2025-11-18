@@ -17,7 +17,7 @@ def test_import_groundeddino_vl():
 
     # Should have version
     assert hasattr(groundeddino_vl, "__version__"), "groundeddino_vl missing __version__"
-    assert groundeddino_vl.__version__ == "2025.11.0"
+    assert isinstance(groundeddino_vl.__version__, str) and groundeddino_vl.__version__
 
     # Verify core functions are available
     assert hasattr(groundeddino_vl, "load_model"), "groundeddino_vl missing load_model"

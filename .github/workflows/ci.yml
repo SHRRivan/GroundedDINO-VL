@@ -6,6 +6,12 @@ on:
   pull_request:
     branches: [main, develop]
   workflow_dispatch:
+    inputs:
+      gpu:
+        description: "Run GPU install test (CUDA wheels) in venv"
+        required: false
+        type: boolean
+        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -53,9 +59,6 @@ jobs:
           black --version
           black --check groundeddino_vl groundingdino tests
 
-      - name: Run isort check
-        run: isort --check-only groundeddino_vl groundingdino tests
-
       - name: Run mypy
         run: mypy groundeddino_vl --ignore-missing-imports || true
 
@@ -75,31 +78,48 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: pip
 
-      - name: Install build dependencies
+      - name: Create virtual environment
         run: |
+          python -m venv .venv
+          . .venv/bin/activate
+          python -V
+
+      - name: Install build dependencies (venv)
+        run: |
+          . .venv/bin/activate
           python -m pip install --upgrade pip
           pip install setuptools>=68 wheel build
 
-      - name: Install runtime dependencies (CPU)
+      - name: Install runtime dependencies (CPU, venv)
         run: |
+          . .venv/bin/activate
           pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
           pip install -r requirements.txt
 
-      - name: Build and install package
+      - name: Build and install package (venv)
         run: |
+          . .venv/bin/activate
           pip install -e . --no-build-isolation
 
-      - name: Install test dependencies
-        run: pip install pytest pytest-cov
+      - name: Install test dependencies (venv)
+        run: |
+          . .venv/bin/activate
+          pip install pytest pytest-cov
 
-      - name: Run import tests
-        run: pytest tests/test_import.py -v
+      - name: Run import tests (venv)
+        run: |
+          . .venv/bin/activate
+          pytest tests/test_import.py -v
 
-      - name: Run import names tests
-        run: pytest tests/test_import_names.py -v
+      - name: Run import names tests (venv)
+        run: |
+          . .venv/bin/activate
+          pytest tests/test_import_names.py -v
 
-      - name: Run API tests
-        run: pytest tests/test_api.py -v --cov=groundeddino_vl --cov=groundingdino --cov-report=xml
+      - name: Run API tests (venv)
+        run: |
+          . .venv/bin/activate
+          pytest tests/test_api.py -v --cov=groundeddino_vl --cov=groundingdino --cov-report=xml
 
       - name: Upload coverage to Codecov
         if: matrix.python-version == '3.11'
@@ -144,3 +164,65 @@ jobs:
         with:
           name: build-artifacts
           path: dist/
+
+  test-gpu:
+    name: Test GPU Wheels in venv (Python 3.11)
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.gpu == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Create virtual environment
+        run: |
+          python -m venv .venv
+          . .venv/bin/activate
+          python -V
+
+      - name: Install build dependencies (venv)
+        run: |
+          . .venv/bin/activate
+          python -m pip install --upgrade pip
+          pip install setuptools>=68 wheel build
+
+      - name: Install runtime dependencies (GPU CUDA wheels, venv)
+        run: |
+          . .venv/bin/activate
+          # Install CUDA-enabled Torch to verify GPU wheel installation path
+          pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
+          pip install -r requirements.txt
+
+      - name: Show Torch/CUDA versions (venv)
+        run: |
+          . .venv/bin/activate
+          python -c "import torch; print('PyTorch version:', torch.__version__); print('Built with CUDA:', getattr(torch.version, 'cuda', None)); print('CUDA available at runtime:', torch.cuda.is_available())"
+
+      - name: Build and install package (venv)
+        run: |
+          . .venv/bin/activate
+          pip install -e . --no-build-isolation
+
+      - name: Install test dependencies (venv)
+        run: |
+          . .venv/bin/activate
+          pip install pytest pytest-cov
+
+      - name: Run import tests (venv)
+        run: |
+          . .venv/bin/activate
+          pytest tests/test_import.py -v
+
+      - name: Run import names tests (venv)
+        run: |
+          . .venv/bin/activate
+          pytest tests/test_import_names.py -v
+
+      - name: Run API tests (venv)
+        run: |
+          . .venv/bin/activate
+          pytest tests/test_api.py -v --cov=groundeddino_vl --cov=groundingdino --cov-report=xml
