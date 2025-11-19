@@ -276,18 +276,7 @@ from groundeddino_vl.utils import inference  # Note: utils (plural)
 
 ## Package Structure
 
-```
-groundeddino_vl/
-├── models/           # Model architectures
-│   ├── grounding_dino/
-│   └── configs/
-├── ops/              # CUDA operations
-│   └── csrc/
-├── utils/            # Utilities (inference, config, visualization)
-├── data/             # Data loading and transforms
-├── api/              # High-level API (future)
-└── exporters/        # Model export (ONNX, TensorRT - future)
-```
+See [PROJECT_STRUCTURE.md](/docs/PROJECT_STRUCTURE.md) for detailed directory structure and module descriptions.
 
 ---
 
@@ -295,16 +284,14 @@ groundeddino_vl/
 
 ### From groundingdino-cu128
 
-The package has been renamed from `groundingdino-cu128` to `groundeddino_vl`:
+The package has been renamed from `groundingdino-cu128` to `groundeddino_vl`. Note that `pip install groundingdino-cu128` has been pulled from PyPI. Users must now use `pip install groundeddino_vl`.
 
-| Old | New | Status |
-|-----|-----|--------|
-| `pip install groundingdino-cu128` | `pip install groundeddino_vl` | ✅ Both work |
-| `import groundingdino` | `import groundeddino_vl` | ✅ Both work (old shows warning) |
-| `groundingdino.util` | `groundeddino_vl.utils` | ⚠️ Note: plural |
-| `groundingdino.datasets` | `groundeddino_vl.data` | ⚠️ Renamed |
-
-See [MIGRATION_GUIDE_PHASE1.md](MIGRATION_GUIDE_PHASE1.md) for detailed migration instructions.
+| Old | New |
+|-----|-----|
+| `pip install groundingdino-cu128` | `pip install groundeddino_vl` |
+| `import groundingdino` | `import groundeddino_vl` |
+| `groundingdino.util` | `groundeddino_vl.utils` |
+| `groundingdino.datasets` | `groundeddino_vl.data` |
 
 ---
 
