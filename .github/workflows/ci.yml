@@ -58,13 +58,6 @@ jobs:
           . .venv/bin/activate
           flake8 groundeddino_vl groundingdino tests --max-line-length=120 --extend-ignore=E203,W503,E501,E741,F841,E722,E731,E713,E721,E402
 
-      - name: Show version.py exactly from CI
-        run: |
-          echo "=== RAW FILE ==="
-          sed -n l groundeddino_vl/version.py
-          echo "=== HEX ==="
-          hexdump -C groundeddino_vl/version.py
-
       - name: Run black check (venv)
         run: |
           . .venv/bin/activate
@@ -83,7 +76,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.10", "3.11", "3.12"]
     steps:
       - uses: actions/checkout@v4
 

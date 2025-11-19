@@ -57,8 +57,7 @@ except ImportError:
     CppExtension = None
     CUDAExtension = None
 
-# GroundedDINO-VL version info
-version = "v2.0.0"
+# GroundedDINO-VL package info
 package_name = "groundeddino-vl"
 cwd = os.path.dirname(os.path.abspath(__file__))
 
@@ -68,16 +67,6 @@ try:
     sha = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=cwd).decode("ascii").strip()
 except Exception:
     pass
-
-
-def write_version_file():
-    # Write version to GroundedDINO-VL package
-    version_path = os.path.join(cwd, "groundeddino_vl", "version.py")
-    with open(version_path, "w") as f:
-        f.write(f"__version__ = '{version}'\n")
-        # f.write(f"git_version = {repr(sha)}\n")
-
-
 requirements = ["torch", "torchvision"]
 
 # Only check torch version if torch is available
@@ -555,14 +544,12 @@ def parse_requirements(fname="requirements.txt", with_version=True):
 
 
 if __name__ == "__main__":
-    print(f"Building wheel {package_name}-{version}")
+    print(f"Building wheel for {package_name}")
 
     # Check prerequisites before proceeding (if not already checked)
     if not _PREREQUISITES_CHECKED:
         check_prerequisites()
         _PREREQUISITES_CHECKED = True
-
-    write_version_file()
 
     # Note: Most metadata is now in pyproject.toml
     # This setup.py only handles the C++ extension compilation
@@ -573,6 +560,7 @@ if __name__ == "__main__":
         setup(
             ext_modules=ext_modules,
             cmdclass={"build_ext": torch.utils.cpp_extension.BuildExtension},
+            version=None,
         )
     else:
-        setup()
+        setup(version=None)
