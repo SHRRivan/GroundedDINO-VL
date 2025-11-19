@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import hashlib
 import os
-import shutil
 import sys
 from pathlib import Path
 from typing import Optional, Tuple
@@ -196,7 +195,7 @@ def _ensure_huggingface_file(filename: str, cache_dir: Path) -> Path:
                 print(f"[weights_manager] Checksum valid, using cached: {cache_path}")
                 return cache_path
             else:
-                print(f"[weights_manager] Checksum mismatch, re-downloading...")
+                print("[weights_manager] Checksum mismatch, re-downloading...")
                 cache_path.unlink()
         else:
             print(f"[weights_manager] Using cached: {cache_path}")
@@ -210,7 +209,7 @@ def _ensure_huggingface_file(filename: str, cache_dir: Path) -> Path:
 
     # Validate checksum if known
     if filename in KNOWN_CHECKSUMS:
-        print(f"[weights_manager] Validating checksum...")
+        print("[weights_manager] Validating checksum...")
         actual_sha256 = _calculate_sha256(cache_path)
         expected_sha256 = KNOWN_CHECKSUMS[filename]
         if actual_sha256 != expected_sha256:
@@ -220,7 +219,7 @@ def _ensure_huggingface_file(filename: str, cache_dir: Path) -> Path:
                 f"Expected: {expected_sha256}, got: {actual_sha256}. "
                 f"File has been deleted. Please try again."
             )
-        print(f"[weights_manager] Checksum validated successfully")
+        print("[weights_manager] Checksum validated successfully")
 
     return cache_path
 
@@ -357,7 +356,7 @@ def download_model_weights(
 
     # Download checkpoint
     if not checkpoint_path.exists():
-        print(f"[weights_manager] Downloading checkpoint...")
+        print("[weights_manager] Downloading checkpoint...")
         url = f"https://huggingface.co/{HUGGINGFACE_REPO}/resolve/main/{DEFAULT_CHECKPOINT_FILE}"
         _download_file(url, checkpoint_path)
 
@@ -371,17 +370,17 @@ def download_model_weights(
                     f"Checksum validation failed for checkpoint. "
                     f"Expected: {expected_sha256}, got: {actual_sha256}."
                 )
-            print(f"[weights_manager] Checkpoint validated")
+            print("[weights_manager] Checkpoint validated")
     else:
         print(f"[weights_manager] Checkpoint already cached: {checkpoint_path}")
 
     # Try to download config (optional)
     if not config_path.exists():
-        print(f"[weights_manager] Attempting to download config...")
+        print("[weights_manager] Attempting to download config...")
         try:
             url = f"https://huggingface.co/{HUGGINGFACE_REPO}/resolve/main/{DEFAULT_CONFIG_FILE}"
             _download_file(url, config_path)
-            print(f"[weights_manager] Config downloaded")
+            print("[weights_manager] Config downloaded")
         except Exception as e:
             print(f"[weights_manager] Config download failed (this may be okay): {e}")
             # Config is optional, try package default
