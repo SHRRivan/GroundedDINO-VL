@@ -19,15 +19,17 @@ This project provides a clean, modernized implementation while maintaining compa
 
 ### Key Features
 
-- ✅ **Modern Stack**: PyTorch 2.7 + CUDA 12.8 support
-- ✅ **Zero-Shot Detection**: Detect objects using natural language descriptions
-- ✅ **High Performance**: Based on GroundingDINO's COCO zero-shot 52.5 AP
-- ✅ **Backward Compatible**: Existing GroundingDINO code continues to work
-- ✅ **Clean Architecture**: Refactored package structure with better organization
+- **Modern Stack**: PyTorch 2.7 + CUDA 12.8 support
+- **Zero-Shot Detection**: Detect objects using natural language descriptions
+- **High Performance**: Based on GroundingDINO's COCO zero-shot 52.5 AP
+- **Backward Compatible**: Existing GroundingDINO code continues to work
+- **Clean Architecture**: Refactored package structure with better organization
+- **Label Studio Integration**: Real-time ML backend for auto-annotation workflows
 
 ---
 
-## Example Images Using GroundedDINO-VL
+## Example Results
+
 <table>
   <tr>
     <td><img src="https://github.com/user-attachments/assets/f83fc105-00ff-4eca-a3bf-6711a5b47fdb" width="400"></td>
@@ -39,101 +41,66 @@ This project provides a clean, modernized implementation while maintaining compa
   </tr>
 </table>
 
+---
 
+## Documentation Index
+
+### Getting Started
+- [Installation Guide](docs/INSTALLATION.md) - System requirements, installation methods, and verification
+- [Quick Start Guide](docs/QUICKSTART.md) - Basic usage examples and common workflows
+- [API Reference](docs/API_REFERENCE.md) - Complete API documentation with examples
+
+### Advanced Topics
+- [Label Studio Integration](docs/LABEL_STUDIO.md) - Auto-annotation and ML backend setup
+- [Building from Source](BUILD_GUIDE.md) - Detailed compilation and build instructions
+- [Project Structure](docs/PROJECT_STRUCTURE.md) - Codebase organization and architecture
+
+### Integration & Deployment
+- [Testing & Validation](docs/TESTING.md) - Test suite, CI/CD, and quality assurance
+- [Migration Guide](docs/MIGRATION_TO_API.md) - Upgrading from previous versions
+- [Security Best Practices](docs/SECURITY.md) - Security guidelines and considerations
+
+### Contributing & Support
+- [Contributing Guidelines](CONTRIBUTING.md) - How to contribute to the project
+- [Changelog](docs/CHANGELOG.md) - Version history and release notes
+- [Troubleshooting](docs/TROUBLESHOOTING.md) - Common issues and solutions
 
 ---
 
-## Installation
+## Quick Installation
 
-### Requirements
-
-- **Python**: 3.9, 3.10, 3.11, or 3.12
-- **PyTorch**: 2.7.0+ (comes with CUDA support)
-- **C++17 Compiler**: GCC 7+, Clang 5+, or MSVC 2019+
-- **CUDA Toolkit** (optional): 12.6 or 12.8 for GPU acceleration
-
-### Quick Install (PyPI)
+### Via PyPI (Recommended)
 
 ```bash
 pip install groundeddino_vl
 ```
 
-### Install with GPU Support (CUDA 12.8)
+### With GPU Support (CUDA 12.8)
 
 ```bash
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
 pip install groundeddino_vl
 ```
 
-### Install from Source (Development)
+### From Source
 
 ```bash
-# Clone repository
 git clone https://github.com/ghostcipher1/GroundedDINO-VL.git
 cd GroundedDINO-VL
-
-# Install PyTorch with CUDA support
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
-
-# Install in development mode
 pip install -e .
 ```
 
-
-### Verify Installation
-
-```bash
-python -c "import groundeddino_vl; print(f'GroundedDINO-VL {groundeddino_vl.__version__}')"
-```
-
-### Building from Source (Advanced)
-
-For detailed build instructions, including troubleshooting and custom compiler flags, see [BUILD_GUIDE.md](BUILD_GUIDE.md).
-
-<img alt="LabelStudio logo" src="https://user-images.githubusercontent.com/12534576/192582340-4c9e4401-1fe6-4dbb-95bb-fdbba5493f61.png" />
-
-## Label Studio ML Backend (GroundedDINO-VL v2.0.0)
-
-GroundedDINO-VL v2.0.0 introduces an optional Label Studio ML Backend (`ls_backend`) that allows GroundedDINO-VL to act as a real-time auto-annotation service inside Label Studio.
-
-This backend runs as a standalone FastAPI service (default port 9090) and provides:
-- On-demand inference
-- Auto-labeling ("magic wand")
-- Batch annotation assistance
-- Optional PostgreSQL/SQLite history logging
-
-### Documentation
-
-To keep this README focused, full documentation has been moved into dedicated files:
-
-- **Overview**  
-  [docs/ls_backend/overview.md](docs/ls_backend/overview.md)
-
-- **Installation & Environment Setup**  
-  [docs/ls_backend/installation.md](docs/ls_backend/installation.md)
-
-- **Using GroundedDINO-VL with Label Studio**  
-  [docs/ls_backend/using_with_labelstudio.md](docs/ls_backend/using_with_labelstudio.md)
-
-- **Database Support (PostgreSQL or SQLite)**  
-  [docs/ls_backend/database.md](docs/ls_backend/database.md)
-
-- **Troubleshooting**  
-  [docs/ls_backend/troubleshooting.md](docs/ls_backend/troubleshooting.md)
+**See [Installation Guide](docs/INSTALLATION.md) for detailed instructions and system requirements.**
 
 ---
 
-## Quick Start
+## Quick Start Example
 
-### Modern High-Level API (Recommended)
-
-The recommended way to use GroundedDINO-VL is through the clean public API that abstracts away preprocessing, postprocessing, and model management:
-
-#### Basic Detection with Text Prompts
 ```python
-from groundeddino_vl import load_model, predict
+from groundeddino_vl import load_model, predict, annotate
 
-# Load model once
+# Load model (auto-downloads weights on first run)
 model = load_model(
     config_path="path/to/config.py",
     checkpoint_path="path/to/weights.pth",
@@ -144,158 +111,35 @@ model = load_model(
 result = predict(
     model=model,
     image="path/to/image.jpg",
-    text_prompt="car . person . dog",  # Objects separated by " . "
+    text_prompt="car . person . dog",
     box_threshold=0.35,
     text_threshold=0.25,
 )
 
-# Access results
-print(f"Found {len(result)} objects")
-for label, score in zip(result.labels, result.scores):
-    print(f"{label}: {score:.2f}")
-
-# Convert boxes to pixel coordinates (xyxy format)
-boxes_xyxy = result.to_xyxy(denormalize=True)
-print(f"Boxes: {boxes_xyxy}")
+# Visualize results
+annotated_image = annotate(image, result, show_labels=True)
 ```
 
-#### Detection from Image Arrays
-```python
-import cv2
-from groundeddino_vl import load_model, predict
-
-# Load image with OpenCV (BGR format)
-image_bgr = cv2.imread("photo.jpg")
-
-# Convert BGR to RGB for the API
-image_rgb = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
-
-model = load_model("config.py", "weights.pth")
-result = predict(model, image_rgb, "cat . dog . bird")
-
-print(f"Detections: {result}")
-```
-
-#### Annotate and Visualize Results
-```python
-from groundeddino_vl import load_model, predict, annotate, load_image
-import cv2
-
-model = load_model("config.py", "weights.pth")
-
-# load_image returns (original_array, preprocessed_tensor)
-image_np, _ = load_image("photo.jpg")
-
-result = predict(model, image_np, "car . truck . bus")
-
-# Annotate image (returns BGR format for OpenCV)
-annotated = annotate(image_np, result, show_labels=True, show_confidence=True)
-
-# Save or display result
-cv2.imwrite("output.jpg", annotated)
-cv2.imshow("Result", annotated)
-cv2.waitKey(0)
-```
-
-### Advanced API: Low-Level Control with Supervision
-
-For advanced users who need fine-grained control or want to use Supervision detections directly:
-
-```python
-import cv2
-from groundeddino_vl.utils.inference import Model
-import supervision as sv
-
-# Load image with OpenCV (BGR format)
-image_bgr = cv2.imread("photo.jpg")
-
-# Use the Model class for lower-level access
-model = Model(
-    model_config_path="config.py",
-    model_checkpoint_path="weights.pth"
-)
-
-# Predict with caption (returns sv.Detections + labels)
-detections, labels = model.predict_with_caption(
-    image=image_bgr,
-    caption="person . car . bicycle",  # Objects separated by " . "
-    box_threshold=0.35,
-    text_threshold=0.25,
-)
-
-# Visualize with Supervision
-box_annotator = sv.BoxAnnotator()
-annotated = box_annotator.annotate(scene=image_bgr, detections=detections)
-
-# Add labels with confidence scores
-label_annotator = sv.LabelAnnotator()
-labels_with_conf = [
-    f"{label} {conf:.2f}"
-    for label, conf in zip(labels, detections.confidence)
-]
-annotated = label_annotator.annotate(
-    scene=annotated,
-    detections=detections,
-    labels=labels_with_conf
-)
-
-cv2.imshow("Result", annotated)
-cv2.waitKey(0)
-```
-
-#### Class-Based Detection
-```python
-# Detect specific classes instead of generic captions
-detections = model.predict_with_classes(
-    image=image_bgr,
-    classes=["cat", "dog", "bird"],
-    box_threshold=0.35,
-    text_threshold=0.25,
-)
-
-# class_id field is automatically populated
-print(f"Class IDs: {detections.class_id}")
-```
-
----
-### Backward Compatibility
-
-Existing GroundingDINO code continues to work (with deprecation warnings):
-
-```python
-# Old imports (still supported)
-import groundingdino
-from groundingdino.util import inference  # Note: util not utils
-
-# New recommended imports
-import groundeddino_vl
-from groundeddino_vl.utils import inference  # Note: utils (plural)
-```
+**See [Quick Start Guide](docs/QUICKSTART.md) for more examples and usage patterns.**
 
 ---
 
-## Package Structure
+## Label Studio Integration
 
-See [PROJECT_STRUCTURE.md](/docs/PROJECT_STRUCTURE.md) for detailed directory structure and module descriptions.
+<img alt="LabelStudio logo" src="https://user-images.githubusercontent.com/12534576/192582340-4c9e4401-1fe6-4dbb-95bb-fdbba5493f61.png" width="200" />
 
----
+GroundedDINO-VL includes an optional Label Studio ML Backend for real-time auto-annotation:
 
-## Migration Guide
+- On-demand inference via FastAPI service
+- Auto-labeling with the "magic wand" feature
+- Batch annotation assistance
+- PostgreSQL/SQLite history logging
 
-### From groundingdino-cu128
-
-The package has been renamed from `groundingdino-cu128` to `groundeddino_vl`. Note that `pip install groundingdino-cu128` has been pulled from PyPI. Users must now use `pip install groundeddino_vl`.
-
-| Old | New |
-|-----|-----|
-| `pip install groundingdino-cu128` | `pip install groundeddino_vl` |
-| `import groundingdino` | `import groundeddino_vl` |
-| `groundingdino.util` | `groundeddino_vl.utils` |
-| `groundingdino.datasets` | `groundeddino_vl.data` |
+**Complete setup guide**: [Label Studio Integration Documentation](docs/LABEL_STUDIO.md)
 
 ---
 
-## Original GroundingDINO Research
+## Research Foundation
 
 This project is based on the groundbreaking work:
 
@@ -313,13 +157,6 @@ This project is based on the groundbreaking work:
 **Original Project**: [IDEA-Research/GroundingDINO](https://github.com/IDEA-Research/GroundingDINO)
 **Paper**: [arXiv:2303.05499](https://arxiv.org/abs/2303.05499)
 
-### Original Highlights
-
-- **Open-Set Detection**: Detect everything with language
-- **High Performance**: COCO zero-shot **52.5 AP** (training without COCO data)
-- **COCO Fine-tune**: **63.0 AP**
-- **Flexible**: Works with Stable Diffusion, Segment Anything, etc.
-
 ### Research Benchmarks
 
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/grounding-dino-marrying-dino-with-grounded/zero-shot-object-detection-on-mscoco)](https://paperswithcode.com/sota/zero-shot-object-detection-on-mscoco?p=grounding-dino-marrying-dino-with-grounded)
@@ -328,120 +165,15 @@ This project is based on the groundbreaking work:
 
 ---
 
-## Development
+## System Requirements
 
-### Version Format
-
-GroundedDINO-VL uses semantic versioning:
-
-- Example: `v2.0.0`
-
-### Setup Development Environment
-
-```bash
-# Clone and enter directory
-git clone https://github.com/ghostcipher1/GroundedDINO-VL.git
-cd GroundedDINO-VL
-
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install PyTorch with CUDA support
-pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
-
-# Install in development mode with all dependencies
-pip install -e ".[dev]"
-```
-
-### Running Tests
-
-```bash
-# Run all tests with coverage
-pytest tests/ -v --cov=groundeddino_vl --cov=groundingdino
-
-# Run specific test file
-pytest tests/test_import.py -v
-
-# Run with coverage report
-pytest tests/ --cov=groundeddino_vl --cov-report=html
-```
-
-### Code Quality
-
-```bash
-# Format code
-black groundeddino_vl groundingdino tests
-isort groundeddino_vl groundingdino tests
-
-# Lint code
-flake8 groundeddino_vl groundingdino tests --max-line-length=100
-
-# Type checking (mypy)
-# Install optional type stubs for better type checking
-pip install types-PyYAML types-requests
-
-# Run mypy on ls_backend (fully type-checked)
-mypy groundeddino_vl/ls_backend --ignore-missing-imports
-
-# Run mypy on entire project (some warnings in legacy code)
-mypy groundeddino_vl --ignore-missing-imports
-
-# Security check
-bandit -r groundeddino_vl groundingdino
-```
-
-### Type Checking Status
-
-**GroundedDINO-VL v2.0.1** includes comprehensive type annotations:
-
-- ✅ **ls_backend module**: Fully type-checked (0 errors)
-- ✅ **api module**: Fully type-checked (0 errors)
-- ✅ **utils.inference module**: Fully type-checked (0 errors)
-- ⚠️ **Legacy code**: Some untyped definitions remain for backward compatibility
-
-All public APIs in `groundeddino_vl.api` are properly type-hinted and can be used with type checkers like mypy, pyright, and IDEs with type support.
-
-### Building Distributions
-
-```bash
-# Build source distribution and wheel
-python -m build --no-isolation
-
-# Check distribution integrity
-twine check dist/*
-
-# Artifacts in dist/
-ls -lh dist/
-```
-
----
-
-## Project Structure & Versioning
-
-### Why GroundedDINO-VL?
-
-This project evolved from the `groundingdino-cu128` fork to:
-
-1. **Modernize Architecture**: Clean package structure optimized for current workflows
-2. **Future Features**: Foundation for ONNX export, TensorRT optimization, and high-level APIs
-3. **Clear Identity**: Distinct branding while honoring GroundingDINO's research contributions
-
-### Relationship to GroundingDINO
-
-- **Based on**: GroundingDINO research and original implementation
-- **Legacy Package**: `groundingdino-cu128` (deprecated, redirects to GroundedDINO-VL)
-- **Compatibility**: Full backward compatibility with original GroundingDINO imports
-
----
-
-## Contributing
-
-Contributions are welcome! Please see:
-
-- **Issues**: [github.com/ghostcipher1/GroundedDINO-VL/issues](https://github.com/ghostcipher1/GroundedDINO-VL/issues)
-- **Pull Requests**: Follow the existing code style and add tests
-- **Documentation**: Help improve docs and examples
+| Component | Requirement |
+|-----------|------------|
+| **Python** | 3.9, 3.10, 3.11, or 3.12 |
+| **PyTorch** | 2.7.0+ |
+| **CUDA** (optional) | 12.6 or 12.8 |
+| **C++ Compiler** | GCC 7+, Clang 5+, or MSVC 2019+ |
+| **GPU** (optional) | NVIDIA with Compute Capability 6.0+ |
 
 ---
 
@@ -476,7 +208,7 @@ This project maintains the original Apache 2.0 license and properly attributes t
 - **Homepage**: [github.com/ghostcipher1/GroundedDINO-VL](https://github.com/ghostcipher1/GroundedDINO-VL)
 - **PyPI**: [pypi.org/project/groundeddino_vl](https://pypi.org/project/groundeddino_vl/)
 - **Original GroundingDINO**: [github.com/IDEA-Research/GroundingDINO](https://github.com/IDEA-Research/GroundingDINO)
-- **Legacy Fork**: [github.com/ghostcipher1/groundingdino-cu128](https://github.com/ghostcipher1/groundingdino-cu128)
+- **Issues**: [github.com/ghostcipher1/GroundedDINO-VL/issues](https://github.com/ghostcipher1/GroundedDINO-VL/issues)
 
 ---
 

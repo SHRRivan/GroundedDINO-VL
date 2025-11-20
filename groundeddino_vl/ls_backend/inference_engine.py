@@ -113,9 +113,9 @@ def run_inference(
     # Load model (singleton) using default settings
     model = model_loader.load_model(
         model_config_path=DEFAULT_SETTINGS.model_config_path
-        or "groundeddino_vl/models/configs/GroundingDINO_SwinT_OGC.py",
+        or "groundeddino_vl/models/configs/GroundingDINO_SwinB_cfg.py",
         model_checkpoint_path=DEFAULT_SETTINGS.model_checkpoint_path
-        or "checkpoints/groundingdino_swint_ogc.pth",
+        or "checkpoints/groundingdino_swinb_cogcoor.pth",
         device=None,
     )
 
