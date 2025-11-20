@@ -4,6 +4,27 @@ All notable changes for the latest release are documented here. Historical entri
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **Auto-download model weights** from HuggingFace Hub on first run with SHA256 validation
+- **CLI entry point** `groundeddino-vl-server` for easy server startup after pip install
+- **Model caching** with platform-aware cache directories (~/.cache/groundeddino-vl/)
+- **`download_model_weights()` function** for explicit pre-downloading and validation
+- **Progress bars** using tqdm for download feedback
+- **Label Studio integration guide** with step-by-step installation and setup instructions
+- **New CLI command** `python -m groundeddino_vl download-weights` for pre-downloading models
+- **Environment variable overrides** for auto-download control (GDVL_AUTO_DOWNLOAD, GDVL_CACHE_DIR)
+
+### Changed
+- **Model loading behavior**: Now attempts auto-download before failing on missing files
+- **server.py**: Added model loading at app startup (create_app()) instead of lazy loading on first request
+- **Dependencies**: Added tqdm>=4.66.0 for progress bar feedback
+
+### Fixed
+- **Model initialization**: create_app() now properly loads the model using CLI-provided paths
+- **Health endpoint**: Returns actual model load status instead of just checking file existence
+
 ## [v2.0.0] - 2025-11-17
 
 ### Added

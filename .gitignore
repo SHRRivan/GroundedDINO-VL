@@ -159,3 +159,8 @@ docs/TESTING_C_EXTENSION.md
 # Demo outputs
 demo/outputs/
 .venv/
+TESTING.md
+Dockerfile
+docker-compose.yml
+.gitignore
+DOCKER_CONTAINER.md
