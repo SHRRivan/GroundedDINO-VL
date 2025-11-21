@@ -2,6 +2,7 @@
 
 Endpoints:
   - GET /health: basic health with model-loaded flag
+  - POST /setup: Label Studio ML backend setup endpoint
   - POST /predict: accept Label Studio task JSON (image URL or base64),
                    run inference, return LS-formatted predictions
   - GET /model-info: return model metadata
@@ -21,6 +22,8 @@ from urllib.request import Request, urlopen
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from . import inference_engine, model_loader
 from .config import DEFAULT_SETTINGS
@@ -73,7 +76,7 @@ def _extract_prompt(task: Dict[str, Any]) -> Union[str, List[str]]:
 
     data = task.get("data")
     if isinstance(data, dict):
-        for key in ("prompt", "caption", "text", "instruction", "classes"):
+        for key in ("prompt", "caption", "text", "instruction", "classes", "category"):
             if key in data:
                 val = data[key]
                 if val and isinstance(val, (str, list)):
@@ -107,6 +110,18 @@ def _to_image_bytes(ref: Union[str, bytes]) -> bytes:
             return base64.b64decode(s)
         except Exception:
             pass
+
+    # Handle local file server URLs (convert to direct file access)
+    if "/data/local-files/?d=" in s:
+        # Extract the file path from the URL parameter
+        import urllib.parse
+        parsed = urllib.parse.urlparse(s)
+        query_params = urllib.parse.parse_qs(parsed.query)
+        if 'd' in query_params:
+            file_path = os.path.join("/data", query_params['d'][0])
+            if os.path.isfile(file_path):
+                with open(file_path, "rb") as f:
+                    return f.read()
 
     # Otherwise treat as URL
     if s.startswith("http://") or s.startswith("https://"):
@@ -175,17 +190,68 @@ def create_app() -> Any:
         model_loaded = bool(info.get("config_path") and info.get("checkpoint_path"))
         return {"status": "ok", "model_loaded": model_loaded}
 
+    @app.post("/setup")
+    def setup(request: Dict[str, Any] = None) -> Dict[str, Any]:
+        """Label Studio ML backend setup endpoint.
+
+        Called when connecting the ML backend to Label Studio.
+        Returns the labeling configuration schema.
+
+        Args:
+            request: Optional Label Studio project configuration
+        """
+        # Return success response with model info
+        return {
+            "model_version": model_loader.get_model_info().get("version", "1.0.0"),
+            "model_name": "GroundedDINO-VL",
+            "model_description": "Zero-shot object detection with vision-language model"
+        }
+
     @app.get("/model-info")
     def model_info() -> Dict[str, Any]:
         return model_loader.get_model_info()
 
+    @app.get("/data/local-files/")
+    def serve_local_file(d: str) -> FileResponse:
+        """Serve local files for Label Studio image display.
+
+        Args:
+            d: Relative path to the file (e.g., 'datasets/automobile/automobile_001.jpg')
+        """
+        # Support both /data/datasets and project-relative paths
+        # First try /data/datasets (absolute path)
+        file_path = os.path.join("/data", d)
+
+        # If not found, try relative to project root
+        if not os.path.isfile(file_path):
+            base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+            file_path = os.path.join(base_dir, d)
+
+        # Resolve to absolute path
+        resolved_path = os.path.abspath(file_path)
+
+        # Security check: ensure the resolved path is within allowed directories
+        allowed_dirs = ["/data/datasets", "/data/groundeddino-vl"]
+        if not any(resolved_path.startswith(os.path.abspath(allowed_dir)) for allowed_dir in allowed_dirs):
+            raise HTTPException(status_code=403, detail="Access denied")
+
+        # Check if file exists
+        if not os.path.isfile(resolved_path):
+            raise HTTPException(status_code=404, detail=f"File not found: {d}")
+
+        return FileResponse(resolved_path)
+
     @app.post("/predict")
-    def predict(task: Union[Dict[str, Any], List[Dict[str, Any]]]) -> List[Any]:
+    def predict(task: Union[Dict[str, Any], List[Dict[str, Any]]]) -> Dict[str, Any]:
         tasks: List[Dict[str, Any]]
         if isinstance(task, list):
             tasks = task
         elif isinstance(task, dict):
-            tasks = [task]
+            # Check if Label Studio wrapped tasks in a 'tasks' key
+            if 'tasks' in task:
+                tasks = task['tasks']
+            else:
+                tasks = [task]
         else:
             raise HTTPException(
                 status_code=400, detail="Invalid JSON body; expected object or list"
@@ -195,10 +261,14 @@ def create_app() -> Any:
         for t in tasks:
             img_ref = _maybe_extract_image_ref(t)
             if img_ref is None:
+                print(f"[ERROR] No image reference found in task: {t}")
                 raise HTTPException(status_code=400, detail="No image reference found in task")
             try:
                 image_bytes = _to_image_bytes(img_ref)
             except Exception as e:
+                print(f"[ERROR] Failed to obtain image bytes from {img_ref}: {e}")
+                import traceback
+                traceback.print_exc()
                 raise HTTPException(status_code=400, detail=f"Failed to obtain image bytes: {e}")
 
             prompt = _extract_prompt(t)
@@ -207,10 +277,15 @@ def create_app() -> Any:
             except Exception as e:
                 raise HTTPException(status_code=500, detail=f"Inference failed: {e}")
 
-            # Append LS-formatted prediction list for this task
-            predictions.append(result["labelstudio"])
+            # Append LS-formatted prediction - extract 'result' field from labelstudio dict
+            ls_output = result["labelstudio"]
+            if isinstance(ls_output, dict) and "result" in ls_output:
+                predictions.append(ls_output)
+            else:
+                predictions.append(ls_output)
 
-        return predictions if len(tasks) > 1 else predictions[0]
+        # Return in the format Label Studio expects
+        return {"results": predictions}
 
     return app
 

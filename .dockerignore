@@ -1,0 +1,65 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+.venv
+venv/
+env/
+ENV/
+
+# IDE
+.idea/
+.vscode/
+*.sublime-*
+.DS_Store
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Tests
+tests/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# CI/CD
+.github/
+
+# Model weights (will be mounted as volume)
+models/
+*.pth
+*.pt
+*.ckpt
+checkpoints/
+
+# Temporary files
+*.log
+*.tmp
+*.bak
+*.swp
+*~
+
+# Docker files
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Demo and outputs
+demo/
+outputs/
+label-studio-data/

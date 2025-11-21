@@ -269,7 +269,7 @@ def convert_xyxy_to_lspct(
 def build_ls_prediction(
     bboxes: List[Dict[str, Any]],
     *,
-    from_name: str = "bbox",
+    from_name: str = "label",
     to_name: str = "image",
     model_version: Optional[str] = None,
 ) -> Dict[str, Any]:
