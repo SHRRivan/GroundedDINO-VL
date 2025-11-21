@@ -34,8 +34,8 @@ warnings.warn(
 
 # Re-export the new public API for backward compatibility
 # Re-export everything from groundeddino_vl
-from groundeddino_vl import *  # noqa: F401, F403
-from groundeddino_vl import (  # noqa: F401
+from groundeddino_vl import *  # noqa: F401, F403, E402
+from groundeddino_vl import (  # noqa: F401, E402
     DetectionResult,
     __author__,
     __version__,

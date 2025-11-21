@@ -12,16 +12,18 @@ def main():
         with open(img_path, "rb") as f:
             encoded = base64.b64encode(f.read()).decode("utf-8")
     except FileNotFoundError:
-        print(
-            f"Sample image not found at {img_path}. Please place a JPEG there (e.g., download any small photo).",
-            file=sys.stderr,
+        msg = (
+            "Sample image not found at "
+            + img_path
+            + ". Please place a JPEG there (e.g., download any small photo)."
         )
+        print(msg, file=sys.stderr)
         sys.exit(1)
 
     task = {
         "data": {
-            "image": f"data:image/jpeg;base64,{encoded}",
-        }
+            "image": "data:image/jpeg;base64," + encoded,
+        },
     }
 
     url = "http://localhost:9090/predict"

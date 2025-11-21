@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "groundeddino-vl"
-version = "1.0.0-Beta"
+version = "1.0.0b1"
 description = "GroundedDINO-VL vision-language backend"
 readme = "README.md"
 license = { text = "Apache-2.0" }
@@ -198,6 +198,23 @@ extend-exclude = '''
     | groundeddino_vl/version\.py
 )
 '''
+
+[tool.flake8]
+# Keep flake8 aligned with black and exclude large/legacy third-party folders
+max-line-length = 100
+extend-ignore = ["E203", "W503"]
+exclude = [
+    ".venv",
+    "build",
+    "dist",
+    "checkpoints",
+    "docs",
+    "tests/__pycache__",
+    "groundingdino",
+    "groundeddino_vl/models/grounding_dino",
+]
+# Allow higher complexity for legacy/ported model code; tune as needed
+max-complexity = 18
 
 
 # isort import sorting configuration

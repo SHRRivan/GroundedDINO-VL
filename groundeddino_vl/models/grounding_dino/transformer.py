@@ -250,7 +250,7 @@ class Transformer(nn.Module):
         valid_ratios = torch.stack([self.get_valid_ratio(m) for m in masks], 1)
 
         # two stage
-        enc_topk_proposals = enc_refpoint_embed = None
+        # enc_topk_proposals and enc_refpoint_embed are not currently used
 
         #########################################################
         # Begin Encoder

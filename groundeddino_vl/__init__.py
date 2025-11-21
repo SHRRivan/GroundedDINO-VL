@@ -67,7 +67,7 @@ except Exception:  # pragma: no cover
         def __call__(self, *args, **kwargs):
             raise ImportError(
                 f"{self._name} is unavailable because optional heavy dependencies "
-                f"(e.g., torch) are not installed in this environment."
+                f"(e.g., torch) are not installed in this environment."  # noqa: E713
             )
 
     class DetectionResult:  # type: ignore

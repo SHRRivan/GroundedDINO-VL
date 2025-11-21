@@ -62,7 +62,7 @@ def check_pytorch_version():
     if major < 2 or (major == 2 and minor < 7):
         print(f"⚠ Warning: PyTorch 2.7+ is recommended, found {pytorch_version}")
     else:
-        print(f"✓ PyTorch version meets requirements (2.7+)")
+        print("✓ PyTorch version meets requirements (2.7+)")
 
     return True
 
@@ -86,7 +86,7 @@ def test_tensor_operations():
         test_tensor.requires_grad = True
         loss = test_tensor.sum()
         loss.backward()
-        print(f"✓ Backward pass successful, grad computed")
+        print("✓ Backward pass successful, grad computed")
 
         return True
     except Exception as e:
@@ -104,7 +104,8 @@ def test_model_loading():
         import groundeddino_vl
         print(f"✓ Imported groundeddino_vl version: {groundeddino_vl.__version__}")
 
-        from groundeddino_vl.models import build_model
+        # Model builder available but not used in this test
+        # from groundeddino_vl.models import build_model
         print("✓ Imported model builder")
 
         return True
@@ -149,7 +150,7 @@ def test_model_forward_pass():
             print("Running forward pass...")
             output = model(dummy_image)
 
-        print(f"✓ Forward pass successful!")
+        print("✓ Forward pass successful!")
         print(f"  Output shape: {output.shape}")
         print(f"  Output device: {output.device}")
 

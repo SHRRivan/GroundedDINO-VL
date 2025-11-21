@@ -16,7 +16,7 @@ from typing import Any, Dict, Optional
 try:
     # High-level wrapper around GroundedDINO-VL
     from groundeddino_vl.utils.inference import Model as GDVLModel
-except Exception as _import_err:  # pragma: no cover - log and re-raise on actual load
+except Exception:  # pragma: no cover - log and re-raise on actual load
     GDVLModel = None  # type: ignore[assignment,misc]
 
 
@@ -114,7 +114,7 @@ def load_model(
                 model_config_path,
                 model_checkpoint_path,
             )
-    except Exception as e:
+    except Exception:
         logger.exception("Auto-download of model files failed")
         raise
 

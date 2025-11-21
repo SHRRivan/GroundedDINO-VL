@@ -13,7 +13,6 @@ Output:
 
 import os
 import json
-from pathlib import Path
 
 # Root dataset directory (as mounted in Docker containers)
 DATASET_ROOT = "/data/datasets"
@@ -33,7 +32,7 @@ def main():
     # Check if dataset root exists
     if not os.path.isdir(DATASET_ROOT):
         print(f"❌ Error: Dataset directory not found: {DATASET_ROOT}")
-        print(f"   Make sure /data/datasets is mounted and accessible.")
+        print("   Make sure /data/datasets is mounted and accessible.")
         return
 
     # List all category folders
@@ -54,7 +53,7 @@ def main():
             continue
 
         # Determine metadata
-        is_field = (category.lower() == "field")
+        is_field = category.lower() == "field"
 
         # Count images in this category
         image_count = 0
@@ -79,9 +78,7 @@ def main():
                     "image": image_url,
                     "category": category,
                     "filename": filename,
-                    "environment": {
-                        "field": is_field
-                    }
+                    "environment": {"field": is_field},
                 }
             }
 
@@ -97,16 +94,16 @@ def main():
         json.dump(tasks, f, indent=2)
 
     print(f"✅ Created {OUTPUT_JSON} with {len(tasks)} tasks")
-    print(f"\n📋 Import instructions:")
-    print(f"   1. Open Label Studio: http://localhost:8080")
-    print(f"   2. Create or open a project")
-    print(f"   3. Go to Import tab")
+    print("\n📋 Import instructions:")
+    print("   1. Open Label Studio: http://localhost:8080")
+    print("   2. Create or open a project")
+    print("   3. Go to Import tab")
     print(f"   4. Upload {OUTPUT_JSON}")
-    print(f"   5. Click Import")
+    print("   5. Click Import")
 
     # Print sample task for verification
     if tasks:
-        print(f"\n🔍 Sample task (first image):")
+        print("\n🔍 Sample task (first image):")
         print(json.dumps(tasks[0], indent=2))
 
 

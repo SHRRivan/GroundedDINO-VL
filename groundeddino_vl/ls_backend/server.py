@@ -23,7 +23,6 @@ from urllib.request import Request, urlopen
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
-from fastapi.staticfiles import StaticFiles
 
 from . import inference_engine, model_loader
 from .config import DEFAULT_SETTINGS
@@ -115,10 +114,11 @@ def _to_image_bytes(ref: Union[str, bytes]) -> bytes:
     if "/data/local-files/?d=" in s:
         # Extract the file path from the URL parameter
         import urllib.parse
+
         parsed = urllib.parse.urlparse(s)
         query_params = urllib.parse.parse_qs(parsed.query)
-        if 'd' in query_params:
-            file_path = os.path.join("/data", query_params['d'][0])
+        if "d" in query_params:
+            file_path = os.path.join("/data", query_params["d"][0])
             if os.path.isfile(file_path):
                 with open(file_path, "rb") as f:
                     return f.read()
@@ -172,7 +172,9 @@ def create_app() -> Any:
         checkpoint_path = os.environ.get("GDVL_CHECKPOINT")
 
         if config_path and checkpoint_path:
-            print(f"[ls_backend] Loading model at startup: config={config_path}, checkpoint={checkpoint_path}")
+            print(
+                f"[ls_backend] Loading model at startup: config={config_path}, checkpoint={checkpoint_path}"
+            )
             model_loader.load_model(
                 model_config_path=config_path,
                 model_checkpoint_path=checkpoint_path,
@@ -204,7 +206,7 @@ def create_app() -> Any:
         return {
             "model_version": model_loader.get_model_info().get("version", "1.0.0"),
             "model_name": "GroundedDINO-VL",
-            "model_description": "Zero-shot object detection with vision-language model"
+            "model_description": "Zero-shot object detection with vision-language model",
         }
 
     @app.get("/model-info")
@@ -232,7 +234,9 @@ def create_app() -> Any:
 
         # Security check: ensure the resolved path is within allowed directories
         allowed_dirs = ["/data/datasets", "/data/groundeddino-vl"]
-        if not any(resolved_path.startswith(os.path.abspath(allowed_dir)) for allowed_dir in allowed_dirs):
+        if not any(
+            resolved_path.startswith(os.path.abspath(allowed_dir)) for allowed_dir in allowed_dirs
+        ):
             raise HTTPException(status_code=403, detail="Access denied")
 
         # Check if file exists
@@ -248,8 +252,8 @@ def create_app() -> Any:
             tasks = task
         elif isinstance(task, dict):
             # Check if Label Studio wrapped tasks in a 'tasks' key
-            if 'tasks' in task:
-                tasks = task['tasks']
+            if "tasks" in task:
+                tasks = task["tasks"]
             else:
                 tasks = [task]
         else:
@@ -268,6 +272,7 @@ def create_app() -> Any:
             except Exception as e:
                 print(f"[ERROR] Failed to obtain image bytes from {img_ref}: {e}")
                 import traceback
+
                 traceback.print_exc()
                 raise HTTPException(status_code=400, detail=f"Failed to obtain image bytes: {e}")
 

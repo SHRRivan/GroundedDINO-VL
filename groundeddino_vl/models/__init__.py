@@ -21,9 +21,9 @@ def build_model(args):
     # Import registry here to avoid circular imports
     from .registry import MODULE_BUILD_FUNCS
 
-    assert (
-        args.modelname in MODULE_BUILD_FUNCS._module_dict
-    ), f"Model {args.modelname} not found in registry"
+    # Check if model is in registry
+    if args.modelname not in MODULE_BUILD_FUNCS._module_dict:
+        raise ValueError(f"Model {args.modelname} not found in registry")  # noqa: E713
 
     build_func = MODULE_BUILD_FUNCS.get(args.modelname)
     model = build_func(args)
