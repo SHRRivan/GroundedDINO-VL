@@ -164,3 +164,9 @@ Dockerfile
 docker-compose.yml
 .gitignore
 DOCKER_CONTAINER.md
+
+fake_images/
+
+fake_labels/
+
+.cache
