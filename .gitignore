@@ -169,4 +169,8 @@ fake_images/
 
 fake_labels/
 
+fake_detections/
+
+test_images/
+
 .cache
