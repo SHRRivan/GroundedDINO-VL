@@ -158,7 +158,7 @@ def main():
             else:
                 with txt_save_path.open('w', encoding='utf-8') as f:
                     for row in bdx:
-                        line = ','.join(map(str, row))
+                        line = ' '.join(map(str, row))
                         f.write(line + '\n')
     
     if args.save_txt:
